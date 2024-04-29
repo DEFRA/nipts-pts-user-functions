@@ -1,0 +1,57 @@
+name: 'V1-B$(Date:yyyyMMdd)-$(BuildID)'
+
+parameters:
+  - name: forceDevDeploy
+    displayName: "Deploy to DEV?"
+    type: boolean
+    default: false
+  - name: deployToSecondary
+    displayName: "Select Secondary Region"
+    type: string
+    default: PRD
+    values:
+      - None
+      - DEV
+      - TST
+      - PRE
+      - PRD
+
+trigger:
+  batch: true
+  branches:
+    include:
+    - '*'
+  paths:
+    include:
+     - src/Defra.PTS.User.Functions/*
+     - test/*
+
+resources:
+  repositories:
+    - repository: PipelineCommon
+      name: DEFRA-TRD/Defra.TRD.Pipeline.Common
+      type: git
+      ref: master
+
+variables:
+  APIName: Defra.PTS.User.Functions
+
+extends:
+  template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
+  parameters:
+    forceDevDeploy: ${{ parameters.forceDevDeploy }}
+    deployToSecondary: ${{ parameters.deployToSecondary}}
+    appName: $(APIName)
+    appProject: PTS
+    sqlProject: TRS
+    appType: 'functionApp'
+    appInstanceNumber: $(nc-region-id)04
+    buildProjects: |
+      **/*Functions.csproj
+      **/*Tests.csproj
+    publishProject: '**/*Functions.csproj'
+    setupMiUser: 'true'
+    connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=pet-travel;Authentication=Active Directory Managed Identity;", "type": "SQLAzure", "slotSetting": false}]'
+    skipBuildTests: false
+    runIntegrationTests: false
+    runSonarScan: true

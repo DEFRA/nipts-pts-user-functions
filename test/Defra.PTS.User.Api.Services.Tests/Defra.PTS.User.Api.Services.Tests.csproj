@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Sql" Version="2.0.144" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+    <PackageReference Include="Moq" Version="4.20.69" />
+    <PackageReference Include="NUnit" Version="3.13.3" />
+    <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Defra.PTS.User.ApiServices\Defra.PTS.User.ApiServices.csproj" />
+    <ProjectReference Include="..\..\src\Defra.PTS.User.Entities\Defra.PTS.User.Entities.csproj" />
+    <ProjectReference Include="..\..\src\Defra.PTS.User.Functions\Defra.PTS.User.Functions.csproj" />
+    <ProjectReference Include="..\..\src\Defra.PTS.User.Models\Defra.PTS.User.Models.csproj" />
+    <ProjectReference Include="..\..\src\Defra.PTS.User.Repositories\Defra.PTS.User.Repositories.csproj" />
+  </ItemGroup>
+
+</Project>
