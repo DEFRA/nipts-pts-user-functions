@@ -34,7 +34,8 @@ resources:
       ref: master
 
 variables:
-  APIName: Defra.PTS.User.Functions
+  APIName: DEFRA_nipts-pts-user-functions
+
 
 extends:
   template: /templates/basic-webapp-deploy-pipeline.yaml@PipelineCommon
