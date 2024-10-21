@@ -53,6 +53,17 @@ extends:
       **/*Tests.csproj
     publishProject: '**/*Functions.csproj'
     setupMiUser: 'true'
+    appSettingsEnv:
+      dev: >-
+        -FUNCTIONS_INPROC_NET8_ENABLED "1"
+      snd: >-
+        -FUNCTIONS_INPROC_NET8_ENABLED "1"
+      tst: >-
+        -FUNCTIONS_INPROC_NET8_ENABLED "1"
+      pre: >-
+        -FUNCTIONS_INPROC_NET8_ENABLED "1"
+      prd: >-
+        -FUNCTIONS_INPROC_NET8_ENABLED "1"
     connectionStrings: '[{"name": "sql_db", "value": "Server=tcp:$(sqlServerName),1433;Database=pet-travel;Authentication=Active Directory Managed Identity;", "type": "SQLAzure", "slotSetting": false}]'
     skipBuildTests: false
     runIntegrationTests: false
