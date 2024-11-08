@@ -169,7 +169,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
 
             var result = sut.GetOwnerByEmail("cuan@test.com");
             Assert.IsNotNull(result);
-            Assert.AreEqual("cuan@test.com", result.Result.Email);
+            Assert.AreEqual("cuan@test.com", result.Result!.Email);
         }
 
         [Test]

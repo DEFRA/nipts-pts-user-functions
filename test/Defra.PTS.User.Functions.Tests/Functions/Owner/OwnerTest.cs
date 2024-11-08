@@ -118,7 +118,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
             ownerServiceMoq!.Setup(a => a.GetOwnerModel(It.IsAny<Stream>())).Returns(Task.FromResult(ownerModel));
             ownerServiceMoq.Setup(a => a.DoesOwnerExists(It.IsAny<string>())).Returns(Task.FromResult(true));
             ownerServiceMoq.Setup(a => a.CreateOwner(It.IsAny<Model.Owner>())).Returns(guid);
-            ownerServiceMoq.Setup(a => a.GetOwnerByEmail(It.IsAny<string>())).Returns(ownerEntity);
+            ownerServiceMoq.Setup(a => a.GetOwnerByEmail(It.IsAny<string>())).Returns(ownerEntity!);
 
             var result = sut!.CreateTraveller(requestMoq.Object, loggerMock!.Object);
             var okResult = result.Result as OkObjectResult;
