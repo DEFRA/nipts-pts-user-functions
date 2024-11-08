@@ -11,6 +11,6 @@ namespace Defra.PTS.User.Repositories.Interface
     public interface IOwnerRepository : IRepository<Entity.Owner>
     {
         Task<bool> DoesOwnerExists(string ownerEmailAddress);
-        Task<Owner> GetOwnerByEmail(string ownerEmailAddress);
+        Task<Owner?> GetOwnerByEmail(string ownerEmailAddress);
     }
 }

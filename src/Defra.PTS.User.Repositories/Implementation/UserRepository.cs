@@ -34,9 +34,9 @@ namespace Defra.PTS.User.Repositories.Implementation
            return await UserContext?.User.AnyAsync(a => a.Email == userEmailAddress!)!;
         }
 
-        public async Task<Entity.User> GetUser(string userEmailAddress)
+        public async Task<Entity.User?> GetUser(string userEmailAddress)
         {
-            return await UserContext.User.SingleOrDefaultAsync(a => a.Email == userEmailAddress);
+            return await UserContext?.User?.SingleOrDefaultAsync(a => a.Email == userEmailAddress)!;
         }
 
         public async Task<bool> PerformHealthCheckLogic()

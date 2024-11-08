@@ -27,9 +27,9 @@ namespace Defra.PTS.User.Repositories.Implementation
         {
         }
 
-        public async Task<Owner> GetOwnerByEmail(string ownerEmailAddress)
+        public async Task<Owner?> GetOwnerByEmail(string ownerEmailAddress)
         {
-            return await userContext.Owner.FirstOrDefaultAsync(a => a.Email == ownerEmailAddress);
+            return await userContext?.Owner?.FirstOrDefaultAsync(a => a.Email == ownerEmailAddress)!;
         }
 
         public async Task<bool> DoesOwnerExists(string ownerEmailAddress)

@@ -12,7 +12,7 @@ namespace Defra.PTS.User.Repositories.Interface
     public interface IUserRepository : IRepository<Entity.User>
     {
         Task<bool> DoesUserExists(string userEmailAddress);
-        Task<Entity.User> GetUser(string userEmailAddress);
+        Task<Entity.User?> GetUser(string userEmailAddress);
         Task<bool> PerformHealthCheckLogic();
         Task<UserDetail> GetUserDetail(Guid contactId);
     }
