@@ -12,7 +12,7 @@ namespace Defra.PTS.User.ApiServices.Interface
     {
         Task<Model.Owner> GetOwnerModel(Stream userStream);
         Task<bool> DoesOwnerExists(string ownerEmail);
-        Task<Owner> GetOwnerByEmail(string ownerEmail);
+        Task<Owner?> GetOwnerByEmail(string ownerEmail);
         Task<Guid> CreateOwner(Model.Owner ownerModel);
     }
 }

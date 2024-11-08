@@ -143,7 +143,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
                 CreatedBy = Guid.Parse("FB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
                 CreatedOn = DateTime.Now
             };
-            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user));
+            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user)!);
             _userRepository.Setup(a => a.Update(user));            
             _userRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
@@ -179,7 +179,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
                 CreatedBy = Guid.Parse("FB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
                 CreatedOn = DateTime.Now
             };
-            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user));
+            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user)!);
             _userRepository.Setup(a => a.Update(user));
             _userRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 

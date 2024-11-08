@@ -80,7 +80,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
             return await _ownerRepository.DoesOwnerExists(ownerEmail);
         }
 
-        public async Task<Owner> GetOwnerByEmail(string ownerEmail)
+        public async Task<Owner?> GetOwnerByEmail(string ownerEmail)
         {
             if (string.IsNullOrEmpty(ownerEmail))
             {

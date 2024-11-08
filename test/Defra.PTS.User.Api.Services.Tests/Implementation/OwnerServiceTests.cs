@@ -164,7 +164,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
                 UpdatedOn = DateTime.Now,
 
             };
-            _OwnerRepository.Setup(a => a.GetOwnerByEmail(It.IsAny<string>())).Returns(Task.FromResult(owner));
+            _OwnerRepository.Setup(a => a.GetOwnerByEmail(It.IsAny<string>())).Returns(Task.FromResult(owner)!);
             sut = new OwnerService(_OwnerRepository.Object, _repoAddressService.Object);
 
             var result = sut.GetOwnerByEmail("cuan@test.com");

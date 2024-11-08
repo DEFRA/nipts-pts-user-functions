@@ -61,7 +61,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
         public async Task<Guid> GetUserIdAsync(string userEmail)
         {
             var user = await _userRepository.GetUser(userEmail);
-            return user.Id;
+            return user!.Id;
         }
 
         public async Task<Guid> UpdateUser(string userEmail, string type)
@@ -69,9 +69,9 @@ namespace Defra.PTS.User.ApiServices.Implementation
 
             var userDB = _userRepository.GetUser(userEmail).Result;
             if (type == "signin")
-                userDB.SignInDateTime = DateTime.Now;
+                userDB!.SignInDateTime = DateTime.Now;
             else
-                userDB.SignOutDateTime = DateTime.Now;
+                userDB!.SignOutDateTime = DateTime.Now;
 
             _userRepository.Update(userDB);
             await _userRepository.SaveChanges();
@@ -84,7 +84,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
         {
 
             var userDB = _userRepository.GetUser(userEmail).Result;
-            userDB.AddressId = addressId;
+            userDB!.AddressId = addressId;
             userDB.UpdatedOn = DateTime.Now;
 
             _userRepository.Update(userDB);
