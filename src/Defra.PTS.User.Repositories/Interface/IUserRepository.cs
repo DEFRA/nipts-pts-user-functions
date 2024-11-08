@@ -1,4 +1,4 @@
-﻿using entity = Defra.PTS.User.Entities;
+﻿using Entity = Defra.PTS.User.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +9,10 @@ using Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories.Interface
 {
-    public interface IUserRepository : IRepository<entity.User>
+    public interface IUserRepository : IRepository<Entity.User>
     {
         Task<bool> DoesUserExists(string userEmailAddress);
-        Task<entity.User> GetUser(string userEmailAddress);
+        Task<Entity.User> GetUser(string userEmailAddress);
         Task<bool> PerformHealthCheckLogic();
         Task<UserDetail> GetUserDetail(Guid contactId);
     }

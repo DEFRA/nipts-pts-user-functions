@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using entity = Defra.PTS.User.Entities;
-using model = Defra.PTS.User.Models;
+using Entity = Defra.PTS.User.Entities;
+using Model = Defra.PTS.User.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,14 +25,14 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
     public class OwnerServiceTests
     {                
         private readonly Mock<IOwnerRepository> _OwnerRepository = new();
-        private readonly Mock<IRepository<entity.Address>> _repoAddressService = new();
+        private readonly Mock<IRepository<Entity.Address>> _repoAddressService = new();
         OwnerService? sut;
 
         [Test]
         public async Task CreateOwner_WhenValidData_ReturnsGuid() 
         {
             Guid addressGuid = Guid.Empty;
-            var modelAddress = new model.Address()
+            var modelAddress = new Model.Address()
             {
                 AddressLineOne = "19 First Avenue",
                 AddressLineTwo = "",                
@@ -46,7 +46,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
                 CreatedOn = DateTime.Now
             };
 
-            var modelOwner = new model.Owner
+            var modelOwner = new Model.Owner
             { 
                 FullName = "Cuan Brown",
                 Email = "cuan@test.com",
@@ -58,7 +58,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
                 Address = modelAddress,
             };
 
-        var address = new entity.Address()
+        var address = new Entity.Address()
             {
                 AddressLineOne = "19 First Avenue",
                 AddressLineTwo = "",
@@ -76,7 +76,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             _repoAddressService.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
             Guid OwnerGuid = Guid.Empty;
-            var Owner = new entity.Owner
+            var Owner = new Entity.Owner
             {
                 Id = OwnerGuid,
                 Email = "cuan@test.com",
@@ -152,7 +152,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
         public void GetOwnerEmailModel_WhenValidData_ReturnsModel()
         {            
             Guid OwnerGuid = Guid.Empty;
-            var owner = new entity.Owner
+            var owner = new Entity.Owner
             {
                 Id = OwnerGuid,
                 FullName = "Cuan Brown",

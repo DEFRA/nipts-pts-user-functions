@@ -1,7 +1,7 @@
 ﻿using Defra.PTS.User.ApiServices.Interface;
 using Defra.PTS.User.Repositories.Interface;
-using entity = Defra.PTS.User.Entities;
-using model = Defra.PTS.User.Models;
+using Entity = Defra.PTS.User.Entities;
+using Model = Defra.PTS.User.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,10 +27,15 @@ namespace Defra.PTS.User.ApiServices.Implementation
             _userRepository = userRepository;            
         }
 
-        [ExcludeFromCodeCoverage]
-        public async Task<Guid> CreateUser(model.User userModel)
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
-            var userDB = new entity.User()
+            PropertyNameCaseInsensitive = true
+        };
+
+        [ExcludeFromCodeCoverage]
+        public async Task<Guid> CreateUser(Model.User userModel)
+        {
+            var userDB = new Entity.User()
             {
                 Email = userModel.Email,
                 FullName = userModel.FullName,
@@ -100,12 +105,12 @@ namespace Defra.PTS.User.ApiServices.Implementation
             return await _userRepository.DoesUserExists(userEmail);
         }
 
-        public async Task<model.User> GetUserModel(Stream userStream)
+        public async Task<Model.User> GetUserModel(Stream userStream)
         {
             try
             {
                 string user = await new StreamReader(userStream).ReadToEndAsync();
-                model.User? userModel = JsonSerializer.Deserialize<model.User>(user, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                Model.User? userModel = JsonSerializer.Deserialize<Model.User>(user, _jsonOptions);
 
                 return userModel!;
             }
@@ -115,12 +120,12 @@ namespace Defra.PTS.User.ApiServices.Implementation
             }
         }
 
-        public async Task<model.UserEmail> GetUserEmailModel(Stream userStream)
+        public async Task<Model.UserEmail> GetUserEmailModel(Stream userStream)
         {
             try
             {
                 string userEmail = await new StreamReader(userStream).ReadToEndAsync();
-                model.UserEmail? userEmailModel = JsonSerializer.Deserialize<model.UserEmail>(userEmail, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                Model.UserEmail? userEmailModel = JsonSerializer.Deserialize<Model.UserEmail>(userEmail, _jsonOptions);
    
                 return userEmailModel!;
             }

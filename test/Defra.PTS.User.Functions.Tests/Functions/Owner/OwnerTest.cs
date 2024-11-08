@@ -1,4 +1,4 @@
-﻿using model = Defra.PTS.User.Models;
+﻿using Model = Defra.PTS.User.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -19,10 +19,10 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
 {
     public class OwnerTest
     {
-        private Mock<HttpRequest> requestMoq;
-        private Mock<ILogger> loggerMock;
-        private Mock<IOwnerService> ownerServiceMoq;
-        testFunc.Owner sut;
+        private Mock<HttpRequest>? requestMoq;
+        private Mock<ILogger>? loggerMock;
+        private Mock<IOwnerService>? ownerServiceMoq;
+        testFunc.Owner? sut;
 
         [SetUp]
         public void SetUp()
@@ -38,30 +38,30 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
         public void CreateOwner_WhenRequestDoesntExist_Then_ReturnsUserException()
         {
             var expectedResult = $"Invalid Owner input, is NUll or Empty";
-            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.CreateTraveller(null, loggerMock.Object));
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateTraveller(null, loggerMock!.Object));
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result.Message);
+            Assert.AreEqual(expectedResult, result!.Message);
 
-            ownerServiceMoq.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Never);
+            ownerServiceMoq!.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Never);
             ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Never);
-            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<model.Owner>()), Times.Never);
+            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<Model.Owner>()), Times.Never);
         }
 
         [Test]
         public void CreateOwner_WhenRequestBodyDoesntExist_Then_ReturnsUserException()
         {
             var expectedResult = $"Invalid Owner input, is NUll or Empty";
-            requestMoq.Setup(a => a.Body).Returns(value: null);
+            requestMoq!.Setup(a => a.Body).Returns(value: null!);
 
-            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.CreateTraveller(requestMoq.Object, loggerMock.Object));
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateTraveller(requestMoq.Object, loggerMock!.Object));
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result.Message);
+            Assert.AreEqual(expectedResult, result!.Message);
 
-            ownerServiceMoq.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Never);
+            ownerServiceMoq!.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Never);
             ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Never);
-            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<model.Owner>()), Times.Never);
+            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<Model.Owner>()), Times.Never);
         }
 
         [Test]
@@ -71,14 +71,14 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
             var expectedResult = guid.Result;
             var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" }");
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
+            requestMoq!.Setup(a => a.Body).Returns(memoryStream);
            
 
-            ownerServiceMoq.Setup(a => a.GetOwnerModel(It.IsAny<Stream>())).Returns(Task.FromResult(new model.Owner() { }));
+            ownerServiceMoq!.Setup(a => a.GetOwnerModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.Owner() { }));
             ownerServiceMoq.Setup(a => a.DoesOwnerExists(It.IsAny<string>())).Returns(Task.FromResult(false));
-            ownerServiceMoq.Setup(a => a.CreateOwner(It.IsAny<model.Owner>())).Returns(guid);
+            ownerServiceMoq.Setup(a => a.CreateOwner(It.IsAny<Model.Owner>())).Returns(guid);
 
-            var result = sut.CreateTraveller(requestMoq.Object, loggerMock.Object);
+            var result = sut!.CreateTraveller(requestMoq.Object, loggerMock!.Object);
             var okResult = result.Result as OkObjectResult;
 
             Assert.IsNotNull(okResult);
@@ -87,7 +87,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
 
             ownerServiceMoq.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Once);
             ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Once);
-            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<model.Owner>()), Times.Once);
+            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<Model.Owner>()), Times.Once);
         }
 
         [Test]
@@ -100,9 +100,9 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
                 "\"UpdatedBy\":\"f72591a1-6d8b-e911-a96f-000d3a29b5de\",\"UpdatedOn\":\"2023-12-14T10:58:46.3873446+00:00\"," +
                 "\"Address\":{\"AddressLine1\":\"27 User Street\",\"AddressLine2\":null,\"TownOrCity\":\"User City\",\"County\":null,\"Postcode\":\"U77 7UU\"}";
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
+            requestMoq!.Setup(a => a.Body).Returns(memoryStream);
 
-            var ownerModel = new model.Owner() 
+            var ownerModel = new Model.Owner() 
             { 
                 Id = guid.Result, 
                 Email = "user@emailprovider.com" 
@@ -115,12 +115,12 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
             });
 
 
-            ownerServiceMoq.Setup(a => a.GetOwnerModel(It.IsAny<Stream>())).Returns(Task.FromResult(ownerModel));
+            ownerServiceMoq!.Setup(a => a.GetOwnerModel(It.IsAny<Stream>())).Returns(Task.FromResult(ownerModel));
             ownerServiceMoq.Setup(a => a.DoesOwnerExists(It.IsAny<string>())).Returns(Task.FromResult(true));
-            ownerServiceMoq.Setup(a => a.CreateOwner(It.IsAny<model.Owner>())).Returns(guid);
+            ownerServiceMoq.Setup(a => a.CreateOwner(It.IsAny<Model.Owner>())).Returns(guid);
             ownerServiceMoq.Setup(a => a.GetOwnerByEmail(It.IsAny<string>())).Returns(ownerEntity);
 
-            var result = sut.CreateTraveller(requestMoq.Object, loggerMock.Object);
+            var result = sut!.CreateTraveller(requestMoq.Object, loggerMock!.Object);
             var okResult = result.Result as OkObjectResult;
 
             Assert.IsNotNull(okResult);
@@ -129,7 +129,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
 
             ownerServiceMoq.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Once);
             ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Once);
-            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<model.Owner>()), Times.Never);        
+            ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<Model.Owner>()), Times.Never);        
         }
     }
 }

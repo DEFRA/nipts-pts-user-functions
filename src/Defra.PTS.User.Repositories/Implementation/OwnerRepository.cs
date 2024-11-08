@@ -1,4 +1,4 @@
-﻿using entity = Defra.PTS.User.Entities;
+﻿using Entity = Defra.PTS.User.Entities;
 using Defra.PTS.User.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,10 +12,10 @@ using System.Diagnostics.CodeAnalysis;
 namespace Defra.PTS.User.Repositories.Implementation
 {
     [ExcludeFromCodeCoverageAttribute]
-    public class OwnerRepository : Repository<entity.Owner>, IOwnerRepository
+    public class OwnerRepository : Repository<Entity.Owner>, IOwnerRepository
     {
 
-        private UserDbContext userContext
+        private UserDbContext? userContext
         {
             get
             {
@@ -34,7 +34,7 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public async Task<bool> DoesOwnerExists(string ownerEmailAddress)
         {
-           return await userContext.Owner.AnyAsync(a => a.Email == ownerEmailAddress);
+           return await userContext?.Owner?.AnyAsync(a => a.Email == ownerEmailAddress)!;
         }
     }
 }
