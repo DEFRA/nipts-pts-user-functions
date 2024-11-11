@@ -16,13 +16,15 @@ namespace Defra.PTS.User.Functions.Functions
     public class HealthCheck
     {
         private readonly IUserService _userService;
+        private const string TagName = "name";
+
         public HealthCheck(IUserService userService)
         {
             _userService = userService;
         }
 
         [FunctionName("HealthCheck")]
-        [OpenApiOperation(operationId: "Run", tags: new[] { "name" })]
+        [OpenApiOperation(operationId: "Run", tags: new[] { TagName })]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "health")] HttpRequest req

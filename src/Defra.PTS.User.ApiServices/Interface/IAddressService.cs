@@ -4,14 +4,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using model = Defra.PTS.User.Models;
+using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.ApiServices.Interface
 {
     public interface IAddressService
     {
-        Task<Guid> CreateAddress(model.Address addressModel);
+        Task<Guid> CreateAddress(Model.Address addressModel);
 
-        Task<model.Address> GetAddressModel(Stream addressStream);
+        Task<Model.Address> GetAddressModel(Stream addressStream);
     }
 }

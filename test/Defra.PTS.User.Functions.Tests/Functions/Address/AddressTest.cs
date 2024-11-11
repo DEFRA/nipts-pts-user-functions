@@ -15,21 +15,19 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Address
     public class AddressTest
     {
         private readonly Mock<HttpRequest> _requestMoq = new();
-        private readonly Mock<ILogger<testFunc.Address>> _mockLogger = new();
         private readonly Mock<IAddressService> _mockAddressService = new();
         testFunc.Address? _sut;
 
         [SetUp]
         public void Setup()
         {
-            _sut = new testFunc.Address(_mockAddressService.Object, _mockLogger.Object);
+            _sut = new testFunc.Address(_mockAddressService.Object);
         }
 
         [TearDown]
         public void Teardown()
         {
             _requestMoq.Reset();
-            _mockLogger.Reset();
             _mockAddressService.Reset();
         }
 
