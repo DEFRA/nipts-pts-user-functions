@@ -1,4 +1,4 @@
-﻿using entity = Defra.PTS.User.Entities;
+﻿using Entity = Defra.PTS.User.Entities;
 using Defra.PTS.User.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -14,10 +14,10 @@ using Defra.PTS.User.Entities;
 namespace Defra.PTS.User.Repositories.Implementation
 {
     [ExcludeFromCodeCoverageAttribute]
-    public class UserRepository : Repository<entity.User>, IUserRepository
+    public class UserRepository : Repository<Entity.User>, IUserRepository
     {
 
-        private UserDbContext userContext
+        private UserDbContext? UserContext
         {
             get
             {
@@ -31,21 +31,21 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public async Task<bool> DoesUserExists(string userEmailAddress)
         {
-           return await userContext.User.AnyAsync(a => a.Email == userEmailAddress);
+           return await UserContext?.User.AnyAsync(a => a.Email == userEmailAddress!)!;
         }
 
-        public async Task<entity.User> GetUser(string userEmailAddress)
+        public async Task<Entity.User?> GetUser(string userEmailAddress)
         {
-            return await userContext.User.SingleOrDefaultAsync(a => a.Email == userEmailAddress);
+            return await UserContext?.User?.SingleOrDefaultAsync(a => a.Email == userEmailAddress)!;
         }
 
         public async Task<bool> PerformHealthCheckLogic()
         {
             // Attempt to open a connection to the database
-            await userContext.Database.OpenConnectionAsync();
+            await UserContext!.Database.OpenConnectionAsync();
 
             // Check if the connection is open
-            if (userContext.Database.GetDbConnection().State == ConnectionState.Open)
+            if (UserContext.Database.GetDbConnection().State == ConnectionState.Open)
             {
                 return true;
             }
@@ -58,8 +58,8 @@ namespace Defra.PTS.User.Repositories.Implementation
         public async Task<UserDetail> GetUserDetail(Guid contactId)
         {
             var query = await (
-                from t1 in userContext.Address
-                join t2 in userContext.User on t1.Id equals t2.AddressId
+                from t1 in UserContext?.Address
+                join t2 in UserContext?.User! on t1.Id equals t2.AddressId
                 where t2.ContactId == contactId
                 select new UserDetail
                 {                    

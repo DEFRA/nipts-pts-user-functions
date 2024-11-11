@@ -1,4 +1,4 @@
-﻿using model = Defra.PTS.User.Models;
+﻿using Model = Defra.PTS.User.Models;
 using Defra.PTS.User.ApiServices.Interface;
 using Defra.PTS.User.Models.CustomException;
 using Microsoft.AspNetCore.Http;
@@ -20,10 +20,10 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 {
     public class HealthCheckTest
     {
-        private Mock<HttpRequest> requestMoq;
-        private Mock<ILogger> loggerMock;
-        private Mock<IUserService> userServiceMoq;
-        testFunc.HealthCheck sut;
+        private Mock<HttpRequest>? requestMoq;
+        private Mock<ILogger>? loggerMock;
+        private Mock<IUserService>? userServiceMoq;
+        testFunc.HealthCheck? sut;
 
         [SetUp] 
         public void SetUp()
@@ -38,8 +38,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
         [Test]
         public void HealthCheck_WhenTrue_Then_ReturnsServiceAvailable()
         {            
-            userServiceMoq.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(true));
-            var result = sut.Run(requestMoq.Object, loggerMock.Object);
+            userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(true));
+            var result = sut!.Run(requestMoq!.Object, loggerMock!.Object);
             var okResult = result.Result as OkResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(200, okResult?.StatusCode);
@@ -49,8 +49,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
         [Test]
         public void HealthCheck_WhenFalse_Then_ReturnsServiceUnavailable()
         {
-            userServiceMoq.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(false));
-            var result = sut.Run(requestMoq.Object, loggerMock.Object);
+            userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(false));
+            var result = sut!.Run(requestMoq!.Object, loggerMock!.Object);
             var okResult = result.Result as StatusCodeResult;
             Assert.IsNotNull(result);
             Assert.AreEqual(503, okResult?.StatusCode);

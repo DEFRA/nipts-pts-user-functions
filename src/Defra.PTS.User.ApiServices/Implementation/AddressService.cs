@@ -11,18 +11,23 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using entity = Defra.PTS.User.Entities;
-using model = Defra.PTS.User.Models;
+using Entity = Defra.PTS.User.Entities;
+using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.ApiServices.Implementation
 {
     [ExcludeFromCodeCoverage]
     public class AddressService : IAddressService
     {        
-        private readonly IRepository<entity.Address> _addressRepository;
+        private readonly IRepository<Entity.Address> _addressRepository;
+
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
         public AddressService(
-             IRepository<entity.Address> addressRepository)
+             IRepository<Entity.Address> addressRepository)
         {
             _addressRepository = addressRepository;            
         }
@@ -30,7 +35,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
 
         public async Task<Guid> CreateAddress(Address addressModel)
         {
-            var addressDB = new entity.Address()
+            var addressDB = new Entity.Address()
             {
                 AddressLineOne = addressModel.AddressLineOne,
                 AddressLineTwo = addressModel.AddressLineTwo,
@@ -50,13 +55,13 @@ namespace Defra.PTS.User.ApiServices.Implementation
             return addressDB.Id;
         }
 
-        public async Task<model.Address> GetAddressModel(Stream addressStream)
+        public async Task<Model.Address> GetAddressModel(Stream addressStream)
         {
             string address = await new StreamReader(addressStream).ReadToEndAsync();
 
             try
             {
-                model.Address? addressModel = JsonSerializer.Deserialize<model.Address>(address, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                Model.Address? addressModel = JsonSerializer.Deserialize<Model.Address>(address, _jsonOptions);
                 return addressModel!;
             }
             catch

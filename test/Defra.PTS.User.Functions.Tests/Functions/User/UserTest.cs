@@ -1,4 +1,4 @@
-﻿using model = Defra.PTS.User.Models;
+﻿using Model = Defra.PTS.User.Models;
 using Defra.PTS.User.ApiServices.Interface;
 using Defra.PTS.User.Models.CustomException;
 using Microsoft.AspNetCore.Http;
@@ -51,7 +51,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
             userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<model.User>()), Times.Never);
+            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]
@@ -66,7 +66,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
             userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<model.User>()), Times.Never);
+            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]
@@ -79,9 +79,9 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             requestMoq.Setup(a => a.Body).Returns(memoryStream);
 
 
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new model.User() { }));
+            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
             userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(false));
-            userServiceMoq.Setup(a => a.CreateUser(It.IsAny<model.User>())).Returns(guid);
+            userServiceMoq.Setup(a => a.CreateUser(It.IsAny<Model.User>())).Returns(guid);
 
             var result = sut!.CreateUser(requestMoq.Object, loggerMock.Object);
             var okResult = result.Result as OkObjectResult;
@@ -92,7 +92,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Once);
             userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Once);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<model.User>()), Times.Once);
+            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Once);
         }
 
         [Test]
@@ -105,7 +105,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             requestMoq.Setup(a => a.Body).Returns(memoryStream);
 
 
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new model.User() { }));
+            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
             userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(true));
             userServiceMoq.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).Returns(guid);
             userServiceMoq.Setup(a => a.GetUserIdAsync(It.IsAny<string>())).Returns(guid);
@@ -119,7 +119,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Once);
             userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Once);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<model.User>()), Times.Never);
+            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]
@@ -133,7 +133,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
             userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<model.User>()), Times.Never);
+            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]
@@ -148,7 +148,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
             userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<model.User>()), Times.Never);
+            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]
@@ -161,8 +161,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             requestMoq.Setup(a => a.Body).Returns(memoryStream);
 
 
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new model.User() { }));
-            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).Returns(Task.FromResult(new model.UserEmail() { Email = "salim@test.co.uk", Type = "signin" }));
+            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
+            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.UserEmail() { Email = "salim@test.co.uk", Type = "signin" }));
             userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(true));
             userServiceMoq.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).Returns(guid);
 
@@ -188,8 +188,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             requestMoq.Setup(a => a.Body).Returns(memoryStream);
 
 
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new model.User() { }));
-            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).Returns(Task.FromResult(new model.UserEmail() { Email = "salim@test.co.uk", Type = "signin" }));
+            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
+            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.UserEmail() { Email = "salim@test.co.uk", Type = "signin" }));
             userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(false));
             userServiceMoq.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).Returns(guid);
 
@@ -217,7 +217,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
             userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<model.User>()), Times.Never);
+            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]

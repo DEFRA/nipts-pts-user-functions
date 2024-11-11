@@ -1,4 +1,4 @@
-﻿using entity = Defra.PTS.User.Entities;
+﻿using Entity = Defra.PTS.User.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,9 +8,9 @@ using Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories.Interface
 {
-    public interface IOwnerRepository : IRepository<entity.Owner>
+    public interface IOwnerRepository : IRepository<Entity.Owner>
     {
         Task<bool> DoesOwnerExists(string ownerEmailAddress);
-        Task<Owner> GetOwnerByEmail(string ownerEmailAddress);
+        Task<Owner?> GetOwnerByEmail(string ownerEmailAddress);
     }
 }
