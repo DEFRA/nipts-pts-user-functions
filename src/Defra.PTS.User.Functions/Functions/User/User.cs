@@ -16,13 +16,18 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
-using model = Defra.PTS.User.Models;
+using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.Functions.Functions.User
 {
     public class User
     {
         private readonly IUserService _userService;
+        private const string CreateUserTagName = "CreateUser";
+        private const string UpdateUserTagName = "UpdateUser";
+        private const string UpdateUserAddressTagName = "UpdateUserAddress";
+
+
         public User(IUserService userService)
         {
             _userService = userService;
@@ -35,44 +40,37 @@ namespace Defra.PTS.User.Functions.Functions.User
         /// <param name="log"></param>
         /// <returns></returns>
         [FunctionName("CreateUser")]
-        [OpenApiOperation(operationId: "CreateUser", tags: new[] { "CreateUser" })]
+        [OpenApiOperation(operationId: "CreateUser", tags: new[] { CreateUserTagName })]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(model.User), Description = "Create User")]
+        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.User), Description = "Create User")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<IActionResult> CreateUser(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createuser")] HttpRequest req,
             ILogger log)
         {
-            try
+            var inputData = req?.Body;
+            if (inputData == null)
             {
-                var inputData = req?.Body;
-                if (inputData == null)
-                {
-                    throw new UserFunctionException("Invalid user input, is NUll or Empty");
-                }
-
-                var userModel = await _userService.GetUserModel(inputData);
-                if (!await _userService.DoesUserExists(userModel.Email))
-                {
-                    Guid userId = await _userService.CreateUser(userModel);
-                    return new OkObjectResult(userId);
-                }
-                else
-                {
-                    if (!string.IsNullOrEmpty(userModel.Email))
-                    {
-                        _ = await _userService.UpdateUser(userModel.Email, "signin");
-                    }
-                    var userId = await _userService.GetUserIdAsync(userModel.Email);
-                    return new OkObjectResult(userId);                    
-                }
+                throw new UserFunctionException("Invalid user input, is NUll or Empty");
             }
-            catch (Exception ex)
+
+            var userModel = await _userService.GetUserModel(inputData);
+            if (!await _userService.DoesUserExists(userModel.Email))
             {
-                log.LogError(ex, "Error Stack: ", ex.StackTrace);
-                log.LogError(ex, "Exception Message: ", ex.Message);
-                throw;
-            }           
+                Guid userId = await _userService.CreateUser(userModel);
+                return new OkObjectResult(userId);
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(userModel.Email))
+                {
+                    _ = await _userService.UpdateUser(userModel.Email, "signin");
+                }
+                    
+                var userId = await _userService.GetUserIdAsync(userModel.Email);
+                    
+                return new OkObjectResult(userId);                    
+            }       
         }
 
 
@@ -83,38 +81,30 @@ namespace Defra.PTS.User.Functions.Functions.User
         /// <param name="log"></param>
         /// <returns></returns>
         [FunctionName("UpdateUser")]
-        [OpenApiOperation(operationId: "UpdateUser", tags: new[] { "UpdateUser" })]
+        [OpenApiOperation(operationId: "UpdateUser", tags: new[] { UpdateUserTagName })]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(model.UserEmail), Description = "UpdateUser")]
+        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.UserEmail), Description = "UpdateUser")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<IActionResult> UpdateUser(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuser")] HttpRequest req,
             ILogger log)
         {
-            try
-            {
-                var inputData = req?.Body;
-                if (inputData == null)
-                {
-                    throw new UserFunctionException("Invalid user input, is NUll or Empty");
-                }
 
-                var userEmailModel = await _userService.GetUserEmailModel(inputData);
-                if (await _userService.DoesUserExists(userEmailModel.Email))
-                {
-                    var userId = await _userService.UpdateUser(userEmailModel.Email, userEmailModel.Type);
-                    log.LogInformation("User updated with ID: " + userId);
-                    return new OkObjectResult(userId);
-                }
-
-                return new OkObjectResult("Cannot update new User as user does not exists");
-            }
-            catch (Exception ex)
+            var inputData = req?.Body;
+            if (inputData == null)
             {
-                log.LogError(ex, "Error Stack: ", ex.StackTrace);
-                log.LogError(ex,"Exception Message: ", ex.Message);
-                throw;
+                throw new UserFunctionException("Invalid user input, is NUll or Empty");
             }
+
+            var userEmailModel = await _userService.GetUserEmailModel(inputData);
+            if (await _userService.DoesUserExists(userEmailModel.Email))
+            {
+                var userId = await _userService.UpdateUser(userEmailModel.Email, userEmailModel.Type);
+                log.LogInformation("User updated with ID: {0}", userId);
+                return new OkObjectResult(userId);
+            }
+
+            return new OkObjectResult("Cannot update new User as user does not exists");
         }
 
         /// <summary>
@@ -124,38 +114,29 @@ namespace Defra.PTS.User.Functions.Functions.User
         /// <param name="log"></param>
         /// <returns></returns>
         [FunctionName("UpdateUserAddress")]
-        [OpenApiOperation(operationId: "UpdateUserAddress", tags: new[] { "UpdateUserAddress" })]
+        [OpenApiOperation(operationId: "UpdateUserAddress", tags: new[] { UpdateUserAddressTagName })]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(model.UserEmail), Description = "UpdateUserAddress")]
+        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.UserEmail), Description = "UpdateUserAddress")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<IActionResult> UpdateUserAddress(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuseraddress")] HttpRequest req,
             ILogger log)
         {
-            try
+            var inputData = req?.Body;
+            if (inputData == null)
             {
-                var inputData = req?.Body;
-                if (inputData == null)
-                {
-                    throw new UserFunctionException("Invalid user input, is NUll or Empty");
-                }
-
-                var userEmailModel = await _userService.GetUserEmailModel(inputData);
-                if (await _userService.DoesUserExists(userEmailModel.Email))
-                {
-                    var userId = await _userService.UpdateUser(userEmailModel.Email, userEmailModel.AddressId);
-                    log.LogInformation("User updated with ID: ", userId);
-                    return new OkObjectResult(userId);
-                }
-
-                return new OkObjectResult("Cannot update new User as user does not exists");
+                throw new UserFunctionException("Invalid user input, is NUll or Empty");
             }
-            catch (Exception ex)
+
+            var userEmailModel = await _userService.GetUserEmailModel(inputData);
+            if (await _userService.DoesUserExists(userEmailModel.Email))
             {
-                log.LogError(ex, "Error Stack: ", ex.StackTrace);
-                log.LogError(ex, "Exception Message: ", ex.Message);
-                throw;
+                var userId = await _userService.UpdateUser(userEmailModel.Email, userEmailModel.AddressId);
+                log.LogInformation("User updated with ID: ", userId);
+                return new OkObjectResult(userId);
             }
+
+            return new OkObjectResult("Cannot update new User as user does not exists");
         }
     }
 }

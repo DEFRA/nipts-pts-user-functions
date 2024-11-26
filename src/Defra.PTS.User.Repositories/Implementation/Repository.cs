@@ -31,7 +31,7 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public void Delete(object id)
         {
-            TEntity entity = _dbContext.Set<TEntity>().Find(id);
+            TEntity entity = _dbContext.Set<TEntity>().Find(id)!;
             if (entity != null)
             {
                 _dbContext.Set<TEntity>().Remove(entity);
@@ -40,7 +40,7 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public TEntity Find(object id)
         {
-            return _dbContext.Set<TEntity>().Find(id);
+            return _dbContext.Set<TEntity>().Find(id)!;
         }
 
         public IEnumerable<TEntity> GetAll()

@@ -6,8 +6,8 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
-using entity = Defra.PTS.User.Entities;
-using model = Defra.PTS.User.Models;
+using Entity = Defra.PTS.User.Entities;
+using Model = Defra.PTS.User.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
     public class UserServiceTests
     {
         private readonly Mock<IUserRepository> _userRepository = new();
-        private readonly Mock<IRepository<entity.Address>> _repoAddressService = new();
+        private readonly Mock<IRepository<Entity.Address>> _repoAddressService = new();
         UserService? sut;
 
         [TearDown]
@@ -39,7 +39,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
         public async Task CreateUser_WhenValidData_ReturnsGuid() 
         {
             Guid addressGuid = Guid.Empty;
-            var modelAddress = new model.Address()
+            var modelAddress = new Model.Address()
             {
                 AddressLineOne = "19 First Avenue",
                 AddressLineTwo = "",                
@@ -53,7 +53,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
                 CreatedOn = DateTime.Now
             };
 
-            var modelUser = new model.User
+            var modelUser = new Model.User
             {
                 Address = modelAddress,
                 Email = "cuan@test.com",
@@ -72,7 +72,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
 
 
             
-            var address = new entity.Address()
+            var address = new Entity.Address()
             {
                 AddressLineOne = "19 First Avenue",
                 AddressLineTwo = "",
@@ -90,7 +90,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             _repoAddressService.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
             Guid userGuid = Guid.Empty;
-            var user = new entity.User
+            var user = new Entity.User
             {
                 Id = userGuid,
                 Email = "cuan@test.com",
@@ -127,7 +127,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             Guid addressGuid = Guid.Empty;
 
             Guid userGuid = Guid.Empty;
-            var user = new entity.User
+            var user = new Entity.User
             {
                 Id = userGuid,
                 Email = "cuan@test.com",
@@ -143,7 +143,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
                 CreatedBy = Guid.Parse("FB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
                 CreatedOn = DateTime.Now
             };
-            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user));
+            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user)!);
             _userRepository.Setup(a => a.Update(user));            
             _userRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
@@ -163,7 +163,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             Guid addressGuid = Guid.Empty;
 
             Guid userGuid = Guid.Empty;
-            var user = new entity.User
+            var user = new Entity.User
             {
                 Id = userGuid,
                 Email = "cuan@test.com",
@@ -179,7 +179,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
                 CreatedBy = Guid.Parse("FB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
                 CreatedOn = DateTime.Now
             };
-            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user));
+            _userRepository.Setup(a => a.GetUser(It.IsAny<string>())).Returns(Task.FromResult(user)!);
             _userRepository.Setup(a => a.Update(user));
             _userRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
