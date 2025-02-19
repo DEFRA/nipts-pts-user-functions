@@ -16,7 +16,7 @@ using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.ApiServices.Implementation
 {
-    
+    [ExcludeFromCodeCoverage]
     public class AddressService : IAddressService
     {        
         private readonly IRepository<Entity.Address> _addressRepository;

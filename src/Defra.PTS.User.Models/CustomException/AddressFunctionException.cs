@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.User.Models.CustomException
 {
+    [ExcludeFromCodeCoverageAttribute]
     public class AddressFunctionException : Exception
     {
         public AddressFunctionException() { }

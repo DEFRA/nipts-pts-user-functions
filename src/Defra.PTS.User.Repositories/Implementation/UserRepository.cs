@@ -13,6 +13,7 @@ using Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories.Implementation
 {
+    [ExcludeFromCodeCoverageAttribute]
     public class UserRepository : Repository<Entity.User>, IUserRepository
     {
 
