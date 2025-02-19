@@ -24,6 +24,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Defra.PTS.User.Functions.Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Defra.PTS.User.Api.Services.Tests", "test\Defra.PTS.User.Api.Services.Tests\Defra.PTS.User.Api.Services.Tests.csproj", "{DA8E2726-BED9-494E-B481-DAFE4A6395A0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Defra.PTS.User.Repositories.Tests", "Defra.PTS.User.Repositories.Tests\Defra.PTS.User.Repositories.Tests.csproj", "{E6EE2B5E-49D8-4ED1-82DE-6509A126A76E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +60,10 @@ Global
 		{DA8E2726-BED9-494E-B481-DAFE4A6395A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA8E2726-BED9-494E-B481-DAFE4A6395A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA8E2726-BED9-494E-B481-DAFE4A6395A0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6EE2B5E-49D8-4ED1-82DE-6509A126A76E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6EE2B5E-49D8-4ED1-82DE-6509A126A76E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6EE2B5E-49D8-4ED1-82DE-6509A126A76E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6EE2B5E-49D8-4ED1-82DE-6509A126A76E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,6 +71,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7FD4EF2A-F27E-4560-A59D-44FC8C05A83D} = {067C5E1D-95D3-49DD-A502-5A7407C0360B}
 		{DA8E2726-BED9-494E-B481-DAFE4A6395A0} = {067C5E1D-95D3-49DD-A502-5A7407C0360B}
+		{E6EE2B5E-49D8-4ED1-82DE-6509A126A76E} = {067C5E1D-95D3-49DD-A502-5A7407C0360B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {AFE8D5B8-1E7D-4D1F-B942-23A95E7E571C}

@@ -13,7 +13,6 @@ using Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories.Implementation
 {
-    [ExcludeFromCodeCoverageAttribute]
     public class UserRepository : Repository<Entity.User>, IUserRepository
     {
 
@@ -39,6 +38,7 @@ namespace Defra.PTS.User.Repositories.Implementation
             return await UserContext?.User?.SingleOrDefaultAsync(a => a.Email == userEmailAddress)!;
         }
 
+        [ExcludeFromCodeCoverage]
         public async Task<bool> PerformHealthCheckLogic()
         {
             // Attempt to open a connection to the database
