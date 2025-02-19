@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.User.Repositories.Implementation
 {
+    [ExcludeFromCodeCoverageAttribute]
     public class OwnerRepository : Repository<Entity.Owner>, IOwnerRepository
     {
 

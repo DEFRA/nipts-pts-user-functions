@@ -2,6 +2,7 @@
 
 namespace Defra.PTS.User.Models
 {
+    [ExcludeFromCodeCoverageAttribute]
     public class User
     {
         public Guid Id { get; set; }

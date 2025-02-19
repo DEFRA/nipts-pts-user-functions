@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.User.Repositories.Implementation
 {
+    [ExcludeFromCodeCoverageAttribute]
     public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         protected DbContext _dbContext;

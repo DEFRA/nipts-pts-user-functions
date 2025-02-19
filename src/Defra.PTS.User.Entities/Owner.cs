@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.User.Entities
 {
+    [ExcludeFromCodeCoverageAttribute]
     public class Owner
     {       
         public Guid Id { get; set; }
