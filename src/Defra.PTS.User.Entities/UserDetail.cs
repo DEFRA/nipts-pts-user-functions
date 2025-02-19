@@ -4,7 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.User.Entities
 {
-    [ExcludeFromCodeCoverageAttribute]
     public class UserDetail
     {
         [Key]

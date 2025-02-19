@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.User.Models.CustomException
 {
-    [ExcludeFromCodeCoverageAttribute]
     public class UserFunctionException : Exception
     {
         public UserFunctionException() { }
