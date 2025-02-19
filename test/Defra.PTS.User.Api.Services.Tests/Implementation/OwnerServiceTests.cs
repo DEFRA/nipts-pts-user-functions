@@ -86,7 +86,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
                 CreatedOn = DateTime.Now,
                 UpdatedBy = Guid.Parse("FB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
                 UpdatedOn = DateTime.Now,
-                
+                OwnerType = "Test", 
+                CharityName = "TestCharity"
             };
 
             _OwnerRepository.Setup(a => a.Add(Owner)).Returns(Task.FromResult(Owner.Id = OwnerGuid));

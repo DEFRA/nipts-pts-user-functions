@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Defra.PTS.User.Models.Helper
 {
-    [ExcludeFromCodeCoverageAttribute]
+    [ExcludeFromCodeCoverage]
     public static class EnumExtensions
     {
         public static string GetDescription(this Enum enumValue)

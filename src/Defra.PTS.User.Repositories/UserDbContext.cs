@@ -5,7 +5,6 @@ using Entity = Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories
 {
-    [ExcludeFromCodeCoverageAttribute]
     public class UserDbContext :DbContext
     {
         public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)

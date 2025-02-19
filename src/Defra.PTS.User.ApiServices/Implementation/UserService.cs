@@ -32,7 +32,6 @@ namespace Defra.PTS.User.ApiServices.Implementation
             PropertyNameCaseInsensitive = true
         };
 
-        [ExcludeFromCodeCoverage]
         public async Task<Guid> CreateUser(Model.User userModel)
         {
             var userDB = new Entity.User()
@@ -57,7 +56,6 @@ namespace Defra.PTS.User.ApiServices.Implementation
             return userDB.Id;
         }
 
-        [ExcludeFromCodeCoverage]
         public async Task<Guid> GetUserIdAsync(string userEmail)
         {
             var user = await _userRepository.GetUser(userEmail);
@@ -79,7 +77,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
             return userDB.Id;
 
         }
-        [ExcludeFromCodeCoverage]
+
         public async Task<Guid> UpdateUser(string userEmail, Guid? addressId)
         {
 
@@ -94,7 +92,6 @@ namespace Defra.PTS.User.ApiServices.Implementation
 
         }
 
-        [ExcludeFromCodeCoverage]
         public async Task<bool> DoesUserExists(string userEmail)
         {
             if (string.IsNullOrEmpty(userEmail))
@@ -141,7 +138,6 @@ namespace Defra.PTS.User.ApiServices.Implementation
             return await _userRepository.PerformHealthCheckLogic();
         }
 
-        [ExcludeFromCodeCoverage]
         public async Task<UserDetail> GetUserDetail(Guid contactId)
         {
             return await _userRepository.GetUserDetail(contactId);
