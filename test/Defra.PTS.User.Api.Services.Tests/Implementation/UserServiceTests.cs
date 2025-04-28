@@ -47,7 +47,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
                 County = "Essex",
                 CountryName = "UK",
                 PostCode = "RM13 4FT",
-                
+                AddressType = AddressType.User.ToString(),
+
                 IsActive = true,
                 CreatedBy = Guid.Parse("AB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
                 CreatedOn = DateTime.Now
