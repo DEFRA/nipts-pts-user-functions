@@ -105,5 +105,24 @@ namespace Defra.PTS.User.ApiServices.Implementation
                 throw new UserFunctionException("Cannot create Owner as Owner Model Cannot be Deserialized");
             }
         }
+
+        public async Task UpdateOwnerEmailsByOldEmail(string oldEmail, string newEmail)
+        {
+            if (string.IsNullOrEmpty(oldEmail) || string.IsNullOrEmpty(newEmail))
+                return;
+
+            var owners = await _ownerRepository.GetOwnersByEmailAsync(oldEmail);
+            if (owners != null && owners.Any())
+            {
+                foreach (var owner in owners)
+                {
+                    owner.Email = newEmail;
+                    owner.UpdatedOn = DateTime.UtcNow;
+                    _ownerRepository.Update(owner);
+                }
+                await _ownerRepository.SaveChanges();
+            }
+        }
+
     }
 }

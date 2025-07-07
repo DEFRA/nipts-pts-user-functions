@@ -14,5 +14,6 @@ namespace Defra.PTS.User.ApiServices.Interface
         Task<bool> DoesOwnerExists(string ownerEmail);
         Task<Owner?> GetOwnerByEmail(string ownerEmail);
         Task<Guid> CreateOwner(Model.Owner ownerModel);
+        Task UpdateOwnerEmailsByOldEmail(string oldEmail, string newEmail);
     }
 }

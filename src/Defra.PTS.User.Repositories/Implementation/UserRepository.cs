@@ -74,5 +74,23 @@ namespace Defra.PTS.User.Repositories.Implementation
             };
         }
 
+        public async Task<Entity.User?> GetUserByContactId(Guid contactId)
+        {
+            if (UserContext?.User == null)
+                return null;
+
+            return await UserContext.User
+                .Where(u => u.ContactId == contactId)
+                .OrderByDescending(u => u.CreatedOn)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> DoesUserExistsByContactId(Guid contactId)
+        {
+            if (UserContext?.User == null)
+                return false;
+
+            return await UserContext.User.AnyAsync(u => u.ContactId == contactId);
+        }
     }
 }

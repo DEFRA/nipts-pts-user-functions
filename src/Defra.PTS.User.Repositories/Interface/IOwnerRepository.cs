@@ -12,5 +12,6 @@ namespace Defra.PTS.User.Repositories.Interface
     {
         Task<bool> DoesOwnerExists(string ownerEmailAddress);
         Task<Owner?> GetOwnerByEmail(string ownerEmailAddress);
+        Task<List<Owner>> GetOwnersByEmailAsync(string email);
     }
 }

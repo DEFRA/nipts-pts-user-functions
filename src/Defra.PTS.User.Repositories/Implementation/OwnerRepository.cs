@@ -35,5 +35,16 @@ namespace Defra.PTS.User.Repositories.Implementation
         {
            return await userContext?.Owner?.AnyAsync(a => a.Email == ownerEmailAddress)!;
         }
+
+        public async Task<List<Owner>> GetOwnersByEmailAsync(string email)
+        {
+            if (userContext?.Owner == null)
+                return new List<Owner>();
+
+            return await userContext.Owner
+                .Where(o => o.Email == email)
+                .ToListAsync();
+        }
+
     }
 }
