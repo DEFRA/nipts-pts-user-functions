@@ -64,18 +64,20 @@ namespace Defra.PTS.User.Functions.Functions.User
 
         private async Task ProcessEmailUpdate(Entity.User existingUser, Model.User userModel, ILogger log)
         {
-            if (!IsEmailChanged(existingUser.Email, userModel.Email))
+            var existingUserEmail = existingUser.Email;
+            var newEmail = userModel.Email;
+            if (!IsEmailChanged(existingUserEmail, newEmail))
             {
                 return;
             }
 
             log.LogInformation("Email changed for ContactId {ContactId} from {OldEmail} to {NewEmail}",
-                userModel.ContactId, existingUser.Email, userModel.Email);
+                userModel.ContactId, existingUserEmail, newEmail);
 
             try
             {
-                await userService.UpdateUserEmail(existingUser.Email, userModel.Email);
-                await ownerService.UpdateOwnerEmailsByOldEmail(existingUser.Email, userModel.Email);
+                await userService.UpdateUserEmail(existingUserEmail, newEmail);
+                await ownerService.UpdateOwnerEmailsByOldEmail(existingUserEmail, newEmail);
                 log.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);
             }
             catch (Exception ex)
