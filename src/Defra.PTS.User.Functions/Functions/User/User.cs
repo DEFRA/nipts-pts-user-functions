@@ -28,8 +28,8 @@ namespace Defra.PTS.User.Functions.Functions.User
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.User), Description = "Create User")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<IActionResult> CreateUser(
-    [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createuser")] HttpRequest req,
-    ILogger log)
+     [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createuser")] HttpRequest req,
+     ILogger log)
         {
             var inputData = (req?.Body) ?? throw new UserFunctionException("Invalid user input, is NULL or Empty");
             var userModel = await userService.GetUserModel(inputData) ?? throw new UserFunctionException("Failed to parse user model from input data");
@@ -74,8 +74,8 @@ namespace Defra.PTS.User.Functions.Functions.User
 
             try
             {
-                await userService.UpdateUserEmail(existingUser.Email!, userModel.Email!);
-                await ownerService.UpdateOwnerEmailsByOldEmail(existingUser.Email!, userModel.Email!);
+                await userService.UpdateUserEmail(existingUser.Email, userModel.Email);
+                await ownerService.UpdateOwnerEmailsByOldEmail(existingUser.Email, userModel.Email);
                 log.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);
             }
             catch (Exception ex)
@@ -85,14 +85,14 @@ namespace Defra.PTS.User.Functions.Functions.User
             }
         }
 
-        private static bool IsEmailChanged(string? existingEmail, string? newEmail)
+        private static bool IsEmailChanged(string existingEmail, string newEmail)
         {
             return !string.IsNullOrEmpty(existingEmail) &&
                    !string.IsNullOrEmpty(newEmail) &&
                    !string.Equals(existingEmail, newEmail, StringComparison.OrdinalIgnoreCase);
         }
 
-        private async Task UpdateSignInTime(string? email, ILogger log)
+        private async Task UpdateSignInTime(string email, ILogger log)
         {
             if (string.IsNullOrEmpty(email))
             {
