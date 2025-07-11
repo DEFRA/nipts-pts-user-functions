@@ -53,7 +53,7 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public async Task<UserDetail> GetUserDetail(Guid contactId)
         {
-            var user = await UserContext?.User.Where(u => u.ContactId == contactId).FirstOrDefaultAsync()!;
+            var user = await UserContext?.User.Where(u => u.ContactId == contactId).OrderByDescending(a => a.CreatedOn).FirstOrDefaultAsync()!;
             var address = await UserContext?.Address.Where(a => a.Id == user!.AddressId).FirstOrDefaultAsync()!;
 
             return new UserDetail
