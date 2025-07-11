@@ -274,8 +274,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(expectedUser.Id, result.Id);
-            Assert.AreEqual(contactId, result.ContactId);
+            Assert.AreEqual(expectedUser.Id, result?.Id);
+            Assert.AreEqual(contactId, result?.ContactId);
             _userRepository.Verify(a => a.GetUserByContactId(contactId), Times.Once);
         }
 
@@ -365,7 +365,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
         }
 
         [Test]
-        public async Task UpdateUserEmail_WhenUserNotFound_DoesNotThrow()
+        public void  UpdateUserEmail_WhenUserNotFound_DoesNotThrow()
         {
             // Arrange
             var oldEmail = "old@example.com";

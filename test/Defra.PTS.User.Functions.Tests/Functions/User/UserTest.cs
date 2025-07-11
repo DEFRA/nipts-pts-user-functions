@@ -43,7 +43,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             ownerServiceMock.Reset();
         }
 
-        #region Existing Tests - Updated for New Architecture
+       
 
         [Test]
         public void CreateUser_WhenRequestDoesntExist_Then_ReturnsUserException()
@@ -261,10 +261,6 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             Assert.AreEqual(userId, okResult?.Value);
         }
 
-        #endregion
-
-        #region New Tests for ContactId-Based Logic (AC1-AC6)
-
         [Test]
         public async Task CreateUser_ContactIdExists_EmailUnchanged_ReturnsExistingUserId()
         {
@@ -303,8 +299,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(existingUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
 
             userServiceMock.Verify(a => a.GetUserByContactId(contactId), Times.Once);
             userServiceMock.Verify(a => a.UpdateUser(email, "signin"), Times.Once);
@@ -355,8 +351,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(existingUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
 
             userServiceMock.Verify(a => a.GetUserByContactId(contactId), Times.Once);
             userServiceMock.Verify(a => a.UpdateUserEmail(oldEmail, newEmail), Times.Once);
@@ -397,8 +393,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(newUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(newUserId, okResult?.Value);
 
             userServiceMock.Verify(a => a.GetUserByContactId(contactId), Times.Once);
             userServiceMock.Verify(a => a.CreateUser(userModel), Times.Once);
@@ -436,8 +432,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(newUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(newUserId, okResult?.Value);
 
             userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never);
             userServiceMock.Verify(a => a.DoesUserExists(email), Times.Once);
@@ -485,8 +481,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert - Should still return success even if email update fails
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(existingUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
 
             userServiceMock.Verify(a => a.UpdateUserEmail(oldEmail, newEmail), Times.Once);
             userServiceMock.Verify(a => a.UpdateUser(newEmail, "signin"), Times.Once);
@@ -530,8 +526,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert - Should still return success even if sign-in update fails
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(existingUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
         }
 
         [Test]
@@ -542,8 +538,10 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
             requestMock.Setup(a => a.Body).Returns(memoryStream);
 
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
             userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>()))
                 .ReturnsAsync((Model.User?)null);
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 
             // Act & Assert
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock.Object, loggerMock.Object));
@@ -602,8 +600,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(newUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(newUserId, okResult?.Value);
 
             userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never);
             userServiceMock.Verify(a => a.DoesUserExists(email), Times.Once);
@@ -611,8 +609,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
         [Test]
         public async Task CreateUser_EmailChangedButOwnerUpdateFails_StillSucceeds()
-        {
-            // Arrange - AC6 error handling
+        {            
             var contactId = Guid.NewGuid();
             var existingUserId = Guid.NewGuid();
             var oldEmail = "old@example.com";
@@ -652,8 +649,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert - Should still succeed even if owner update fails
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(existingUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
 
             ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail), Times.Once);
         }
@@ -661,7 +658,7 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
         [Test]
         public async Task CreateUser_EmailsAreNullOrEmpty_SkipsEmailUpdate()
         {
-            // Arrange - Edge case testing
+            
             var contactId = Guid.NewGuid();
             var existingUserId = Guid.NewGuid();
 
@@ -693,8 +690,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             // Assert
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult.StatusCode);
-            Assert.AreEqual(existingUserId, okResult.Value);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
 
             // Should not attempt email updates when emails are empty
             userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -702,6 +699,6 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             userServiceMock.Verify(a => a.UpdateUser(It.IsAny<string>(), "signin"), Times.Never);
         }
 
-        #endregion
+        
     }
 }

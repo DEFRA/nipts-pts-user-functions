@@ -190,8 +190,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             var newEmail = "new@example.com";
             var owners = new List<Entity.Owner>
             {
-                new Entity.Owner { Id = Guid.NewGuid(), Email = oldEmail, FullName = "Owner 1" },
-                new Entity.Owner { Id = Guid.NewGuid(), Email = oldEmail, FullName = "Owner 2" }
+                new() { Id = Guid.NewGuid(), Email = oldEmail, FullName = "Owner 1" },
+                new() { Id = Guid.NewGuid(), Email = oldEmail, FullName = "Owner 2" }
             };
 
             _ownerRepository.Setup(a => a.GetOwnersByEmailAsync(oldEmail))
@@ -255,14 +255,16 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
         }
 
         [Test]
-        public async Task UpdateOwnerEmailsByOldEmail_WhenOwnersListIsNull_DoesNotThrow()
+        public  void UpdateOwnerEmailsByOldEmail_WhenOwnersListIsNull_DoesNotThrow()
         {
             // Arrange
             var oldEmail = "old@example.com";
             var newEmail = "new@example.com";
 
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
             _ownerRepository.Setup(a => a.GetOwnersByEmailAsync(oldEmail))
                 .ReturnsAsync((List<Entity.Owner>?)null);
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 
             sut = new OwnerService(_ownerRepository.Object, _repoAddressService.Object);
 

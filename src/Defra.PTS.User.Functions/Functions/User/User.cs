@@ -39,14 +39,12 @@ namespace Defra.PTS.User.Functions.Functions.User
         {
             var inputData = (req?.Body) ?? throw new UserFunctionException("Invalid user input, is NULL or Empty");
             var userModel = await userService.GetUserModel(inputData) ?? throw new UserFunctionException("Failed to parse user model from input data");
-
-            // AC1-AC5: Check by ContactId first
+                        
             if (userModel.ContactId.HasValue && userModel.ContactId.Value != Guid.Empty)
             {
                 var existingUser = await userService.GetUserByContactId(userModel.ContactId.Value);
                 if (existingUser != null)
-                {
-                    // AC4-AC5: Check if email changed
+                {            
                     bool emailChanged = !string.Equals(existingUser.Email, userModel.Email, StringComparison.OrdinalIgnoreCase);
 
                     if (emailChanged && !string.IsNullOrEmpty(existingUser.Email) && !string.IsNullOrEmpty(userModel.Email))
@@ -55,11 +53,8 @@ namespace Defra.PTS.User.Functions.Functions.User
                             userModel.ContactId, existingUser.Email, userModel.Email);
 
                         try
-                        {
-                            // Update user email
+                        {                 
                             await userService.UpdateUserEmail(existingUser.Email, userModel.Email);
-
-                            // AC6: Update owner emails using OwnerService
                             await ownerService.UpdateOwnerEmailsByOldEmail(existingUser.Email, userModel.Email);
 
                             log.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);
@@ -68,11 +63,9 @@ namespace Defra.PTS.User.Functions.Functions.User
                         {
                             log.LogError(ex, "Failed to update emails for ContactId {ContactId}: {ErrorMessage}",
                                 userModel.ContactId, ex.Message);
-                            // Continue execution - don't fail user creation for email update issues
                         }
                     }
-
-                    // Update sign-in time
+                                        
                     if (!string.IsNullOrEmpty(userModel.Email))
                     {
                         try
@@ -88,21 +81,18 @@ namespace Defra.PTS.User.Functions.Functions.User
                     return new OkObjectResult(existingUser.Id);
                 }
             }
-
-            // EXISTING LOGIC: Keep for backward compatibility and AC1
+                        
             if (!string.IsNullOrEmpty(userModel.Email))
             {
                 bool userExists = await userService.DoesUserExists(userModel.Email);
                 if (!userExists)
-                {
-                    // AC1: Create new user
+                {            
                     log.LogInformation("Creating new user for email {Email}", userModel.Email);
                     Guid userId = await userService.CreateUser(userModel);
                     return new OkObjectResult(userId);
                 }
                 else
-                {
-                    // Update existing user sign-in
+                {                 
                     try
                     {
                         await userService.UpdateUser(userModel.Email, "signin");
