@@ -9,16 +9,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.User.ApiServices.Implementation
 {    
-    public class UserService : IUserService
+    public class UserService(IUserRepository userRepository) : IUserService
     {        
-        private readonly IUserRepository _userRepository;
-        
-        public UserService(IUserRepository userRepository)
-        {            
-            _userRepository = userRepository;            
-        }
-
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        private readonly IUserRepository _userRepository = userRepository;
+        private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
@@ -29,9 +23,9 @@ namespace Defra.PTS.User.ApiServices.Implementation
             {
                 Email = userModel.Email,
                 FullName = userModel.FullName,
-                FirstName = userModel.FirstName,
-                LastName = userModel.LastName,
-                Role = userModel.Role,
+                FirstName = userModel.FirstName!,
+                LastName = userModel.LastName!,
+                Role = userModel.Role!,
                 Telephone = userModel.Telephone,
                 ContactId = userModel.ContactId,
                 Uniquereference = userModel.Uniquereference,

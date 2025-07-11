@@ -24,12 +24,13 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
         private readonly Mock<HttpRequest> requestMoq = new();
         private readonly Mock<ILogger> loggerMock = new();
         private readonly Mock<IUserService> userServiceMoq = new();
+        private readonly Mock<IOwnerService> ownerServiceMoq = new();
         testFunc.User? sut;
 
         [SetUp]
         public void SetUp()
         {            
-            sut = new testFunc.User(userServiceMoq.Object);
+            sut = new testFunc.User(userServiceMoq.Object, ownerServiceMoq.Object);
         }
 
         [TearDown]

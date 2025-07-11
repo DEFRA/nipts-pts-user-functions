@@ -13,7 +13,7 @@ using Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories.Implementation
 {
-    public class UserRepository : Repository<Entity.User>, IUserRepository
+    public class UserRepository(DbContext dbContext) : Repository<Entity.User>(dbContext), IUserRepository
     {
 
         private UserDbContext? UserContext
@@ -22,10 +22,6 @@ namespace Defra.PTS.User.Repositories.Implementation
             {
                 return _dbContext as UserDbContext;
             }
-        }
-
-        public UserRepository(DbContext dbContext) : base(dbContext)
-        {
         }
 
         public async Task<bool> DoesUserExists(string userEmailAddress)

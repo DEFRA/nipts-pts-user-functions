@@ -1,7 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization;
 
 namespace Defra.PTS.User.Models
 {
+    [ExcludeFromCodeCoverage]
     public class OwnerEmailUpdateModel
     {
         [JsonPropertyName("oldEmail")]

@@ -3,6 +3,9 @@ using Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories.Interface
 {
+    /// <summary>
+    /// IUserRepository
+    /// </summary>
     public interface IUserRepository : IRepository<Entity.User>
     {
         Task<bool> DoesUserExists(string userEmailAddress);

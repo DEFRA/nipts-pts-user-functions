@@ -1,20 +1,14 @@
 ﻿using Entity = Defra.PTS.User.Entities;
 using Defra.PTS.User.Repositories.Interface;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Defra.PTS.User.Entities;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.User.Repositories.Implementation
 {
-    public class OwnerRepository : Repository<Entity.Owner>, IOwnerRepository
+    public class OwnerRepository(DbContext dbContext) : Repository<Entity.Owner>(dbContext), IOwnerRepository
     {
 
-        private UserDbContext? userContext
+        private UserDbContext? UserContext
         {
             get
             {
@@ -22,26 +16,22 @@ namespace Defra.PTS.User.Repositories.Implementation
             }
         }
 
-        public OwnerRepository(DbContext dbContext) : base(dbContext)
-        {
-        }
-
         public async Task<Owner?> GetOwnerByEmail(string ownerEmailAddress)
         {
-            return await userContext?.Owner?.FirstOrDefaultAsync(a => a.Email == ownerEmailAddress)!;
+            return await UserContext?.Owner?.FirstOrDefaultAsync(a => a.Email == ownerEmailAddress)!;
         }
 
         public async Task<bool> DoesOwnerExists(string ownerEmailAddress)
         {
-           return await userContext?.Owner?.AnyAsync(a => a.Email == ownerEmailAddress)!;
+           return await UserContext?.Owner?.AnyAsync(a => a.Email == ownerEmailAddress)!;
         }
 
         public async Task<List<Owner>> GetOwnersByEmailAsync(string email)
         {
-            if (userContext?.Owner == null)
-                return new List<Owner>();
+            if (UserContext?.Owner == null)
+                return [];
 
-            return await userContext.Owner
+            return await UserContext.Owner
                 .Where(o => o.Email == email)
                 .ToListAsync();
         }

@@ -4,6 +4,9 @@ using Entity = Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.ApiServices.Interface
 {
+    /// <summary>
+    /// IUserService
+    /// </summary>
     public interface IUserService
     {
         Task<Model.User> GetUserModel(Stream userStream);

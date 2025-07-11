@@ -1,11 +1,7 @@
 using System;
-using System.IO;
 using System.Net;
-using System.Reflection;
 using System.Threading.Tasks;
-using Defra.PTS.User.ApiServices.Implementation;
 using Defra.PTS.User.ApiServices.Interface;
-using Defra.PTS.User.Models;
 using Defra.PTS.User.Models.CustomException;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,26 +11,23 @@ using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.Functions.Functions.User
 {
-    public class User
+    public class User(IUserService userService, IOwnerService ownerService)
     {
-        private readonly IUserService _userService;
-        private readonly IOwnerService _ownerService;
         private const string CreateUserTagName = "CreateUser";
         private const string UpdateUserTagName = "UpdateUser";
         private const string UpdateUserAddressTagName = "UpdateUserAddress";
 
-
-        public User(IUserService userService, IOwnerService ownerService)
-        {
-            _userService = userService;
-            _ownerService = ownerService;
-        }
-
+        /// <summary>
+        /// CreateUser
+        /// </summary>
+        /// <param name="req"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        /// <exception cref="UserFunctionException"></exception>
         [FunctionName("CreateUser")]
         [OpenApiOperation(operationId: "CreateUser", tags: new[] { CreateUserTagName })]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
@@ -44,22 +37,13 @@ namespace Defra.PTS.User.Functions.Functions.User
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createuser")] HttpRequest req,
             ILogger log)
         {
-            var inputData = req?.Body;
-            if (inputData == null)
-            {
-                throw new UserFunctionException("Invalid user input, is NULL or Empty");
-            }
-
-            var userModel = await _userService.GetUserModel(inputData);
-            if (userModel == null)
-            {
-                throw new UserFunctionException("Failed to parse user model from input data");
-            }
+            var inputData = (req?.Body) ?? throw new UserFunctionException("Invalid user input, is NULL or Empty");
+            var userModel = await userService.GetUserModel(inputData) ?? throw new UserFunctionException("Failed to parse user model from input data");
 
             // AC1-AC5: Check by ContactId first
             if (userModel.ContactId.HasValue && userModel.ContactId.Value != Guid.Empty)
             {
-                var existingUser = await _userService.GetUserByContactId(userModel.ContactId.Value);
+                var existingUser = await userService.GetUserByContactId(userModel.ContactId.Value);
                 if (existingUser != null)
                 {
                     // AC4-AC5: Check if email changed
@@ -73,10 +57,10 @@ namespace Defra.PTS.User.Functions.Functions.User
                         try
                         {
                             // Update user email
-                            await _userService.UpdateUserEmail(existingUser.Email, userModel.Email);
+                            await userService.UpdateUserEmail(existingUser.Email, userModel.Email);
 
                             // AC6: Update owner emails using OwnerService
-                            await _ownerService.UpdateOwnerEmailsByOldEmail(existingUser.Email, userModel.Email);
+                            await ownerService.UpdateOwnerEmailsByOldEmail(existingUser.Email, userModel.Email);
 
                             log.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);
                         }
@@ -93,7 +77,7 @@ namespace Defra.PTS.User.Functions.Functions.User
                     {
                         try
                         {
-                            await _userService.UpdateUser(userModel.Email, "signin");
+                            await userService.UpdateUser(userModel.Email, "signin");
                         }
                         catch (Exception ex)
                         {
@@ -108,12 +92,12 @@ namespace Defra.PTS.User.Functions.Functions.User
             // EXISTING LOGIC: Keep for backward compatibility and AC1
             if (!string.IsNullOrEmpty(userModel.Email))
             {
-                bool userExists = await _userService.DoesUserExists(userModel.Email);
+                bool userExists = await userService.DoesUserExists(userModel.Email);
                 if (!userExists)
                 {
                     // AC1: Create new user
                     log.LogInformation("Creating new user for email {Email}", userModel.Email);
-                    Guid userId = await _userService.CreateUser(userModel);
+                    Guid userId = await userService.CreateUser(userModel);
                     return new OkObjectResult(userId);
                 }
                 else
@@ -121,14 +105,14 @@ namespace Defra.PTS.User.Functions.Functions.User
                     // Update existing user sign-in
                     try
                     {
-                        await _userService.UpdateUser(userModel.Email, "signin");
+                        await userService.UpdateUser(userModel.Email, "signin");
                     }
                     catch (Exception ex)
                     {
                         log.LogWarning(ex, "Failed to update sign-in time for existing user {Email}", userModel.Email);
                     }
 
-                    var userId = await _userService.GetUserIdAsync(userModel.Email);
+                    var userId = await userService.GetUserIdAsync(userModel.Email);
                     return new OkObjectResult(userId);
                 }
             }
@@ -153,16 +137,11 @@ namespace Defra.PTS.User.Functions.Functions.User
             ILogger log)
         {
 
-            var inputData = req?.Body;
-            if (inputData == null)
+            var inputData = (req?.Body) ?? throw new UserFunctionException("Invalid user input, is NUll or Empty");
+            var userEmailModel = await userService.GetUserEmailModel(inputData);
+            if (await userService.DoesUserExists(userEmailModel.Email))
             {
-                throw new UserFunctionException("Invalid user input, is NUll or Empty");
-            }
-
-            var userEmailModel = await _userService.GetUserEmailModel(inputData);
-            if (await _userService.DoesUserExists(userEmailModel.Email))
-            {
-                var userId = await _userService.UpdateUser(userEmailModel.Email, userEmailModel.Type);
+                var userId = await userService.UpdateUser(userEmailModel.Email, userEmailModel.Type);
                 log.LogInformation("User updated with ID: {0}", userId);
                 return new OkObjectResult(userId);
             }
@@ -185,16 +164,11 @@ namespace Defra.PTS.User.Functions.Functions.User
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuseraddress")] HttpRequest req,
             ILogger log)
         {
-            var inputData = req?.Body;
-            if (inputData == null)
+            var inputData = (req?.Body) ?? throw new UserFunctionException("Invalid user input, is NUll or Empty");
+            var userEmailModel = await userService.GetUserEmailModel(inputData);
+            if (await userService.DoesUserExists(userEmailModel.Email))
             {
-                throw new UserFunctionException("Invalid user input, is NUll or Empty");
-            }
-
-            var userEmailModel = await _userService.GetUserEmailModel(inputData);
-            if (await _userService.DoesUserExists(userEmailModel.Email))
-            {
-                var userId = await _userService.UpdateUser(userEmailModel.Email, userEmailModel.AddressId);
+                var userId = await userService.UpdateUser(userEmailModel.Email, userEmailModel.AddressId);
                 log.LogInformation("User updated with ID: ", userId);
                 return new OkObjectResult(userId);
             }
