@@ -40,7 +40,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
         [Test]
         public async Task CreateUser_WhenValidData_ReturnsGuid()
         {
-            Guid addressGuid = Guid.Empty;
+            // Arrange
+            Guid addressGuid = Guid.NewGuid(); 
             var modelAddress = new Model.Address()
             {
                 AddressLineOne = "19 First Avenue",
@@ -72,32 +73,20 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
                 CreatedOn = DateTime.Now
             };
 
-            Guid userGuid = Guid.NewGuid();
-            var user = new Entity.User
-            {
-                Id = userGuid,
-                Email = "cuan@test.com",
-                FullName = "Cuan Brown",
-                FirstName = "Cuan",
-                LastName = "Brown",
-                AddressId = addressGuid,
-                Telephone = "9999999999",
-                ContactId = Guid.Parse("EB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
-                Uniquereference = "123",
-                SignInDateTime = DateTime.Now,
-                SignOutDateTime = DateTime.Now,
-                CreatedBy = Guid.Parse("FB4ECAEA-877C-4560-EDE4-08DBD163F0B6"),
-                CreatedOn = DateTime.Now
-            };
-
-            _userRepository.Setup(a => a.Add(It.IsAny<Entity.User>())).Returns(Task.CompletedTask);
+            _userRepository.Setup(a => a.Add(It.IsAny<Entity.User>()))
+                .Callback<Entity.User>(user => user.Id = Guid.NewGuid()) 
+                .Returns(Task.CompletedTask);
             _userRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
             sut = new UserService(_userRepository.Object);
 
+            // Act
             var result = await sut.CreateUser(modelUser);
+
+            // Assert
             Assert.AreNotEqual(Guid.Empty, result);
             _userRepository.Verify(a => a.Add(It.IsAny<Entity.User>()), Times.Once);
+            _userRepository.Verify(a => a.SaveChanges(), Times.Once);
         }
 
         [Test]

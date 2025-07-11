@@ -40,7 +40,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
         [Test]
         public async Task CreateOwner_WhenValidData_ReturnsGuid()
         {
-            Guid addressGuid = Guid.NewGuid();
+            // Arrange
+            Guid addressGuid = Guid.NewGuid(); 
             var modelAddress = new Model.Address()
             {
                 AddressLineOne = "19 First Avenue",
@@ -66,19 +67,27 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
                 Address = modelAddress,
             };
 
-            _repoAddressService.Setup(a => a.Add(It.IsAny<Entity.Address>())).Returns(Task.CompletedTask);
+            _repoAddressService.Setup(a => a.Add(It.IsAny<Entity.Address>()))
+                .Callback<Entity.Address>(addr => addr.Id = addressGuid) 
+                .Returns(Task.CompletedTask);
             _repoAddressService.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
-            Guid ownerGuid = Guid.NewGuid();
-
-            _ownerRepository.Setup(a => a.Add(It.IsAny<Entity.Owner>())).Returns(Task.CompletedTask);
+            _ownerRepository.Setup(a => a.Add(It.IsAny<Entity.Owner>()))
+                .Callback<Entity.Owner>(owner => owner.Id = Guid.NewGuid()) 
+                .Returns(Task.CompletedTask);
             _ownerRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
             sut = new OwnerService(_ownerRepository.Object, _repoAddressService.Object);
 
+            // Act
             var result = await sut.CreateOwner(modelOwner);
+
+            // Assert
             Assert.AreNotEqual(Guid.Empty, result);
+            _repoAddressService.Verify(a => a.Add(It.IsAny<Entity.Address>()), Times.Once);
+            _repoAddressService.Verify(a => a.SaveChanges(), Times.Once);
             _ownerRepository.Verify(a => a.Add(It.IsAny<Entity.Owner>()), Times.Once);
+            _ownerRepository.Verify(a => a.SaveChanges(), Times.Once);
         }
 
         [Test]
