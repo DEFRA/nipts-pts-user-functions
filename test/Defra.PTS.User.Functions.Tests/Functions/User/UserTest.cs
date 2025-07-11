@@ -337,8 +337,9 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
             var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" }");
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
             requestMock.Setup(a => a.Body).Returns(memoryStream);
-
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
             userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync((Model.User?)null);
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock.Object, loggerMock.Object));
             Assert.AreEqual("Failed to parse user model from input data", result!.Message);
