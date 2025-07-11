@@ -2,6 +2,7 @@
 
 namespace Defra.PTS.User.Models
 {
+    [ExcludeFromCodeCoverage]
     public class UserEmail
     {
         public string? Email { get; set; }

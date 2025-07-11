@@ -17,27 +17,20 @@ using Defra.PTS.User.Models.Helper;
 
 namespace Defra.PTS.User.ApiServices.Implementation
 {
-    public class OwnerService : IOwnerService
+    public class OwnerService(
+        IOwnerRepository ownerRepository,
+        IRepository<Entity.Address> addressRepository) : IOwnerService
     {        
-        private readonly IOwnerRepository _ownerRepository;
-        private readonly IRepository<Entity.Address> _addressRepository;
+        private readonly IOwnerRepository _ownerRepository = ownerRepository;
+        private readonly IRepository<Entity.Address> _addressRepository = addressRepository;
 
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public OwnerService(            
-            IOwnerRepository ownerRepository,
-            IRepository<Entity.Address> addressRepository)
-        {            
-            _ownerRepository = ownerRepository;
-            _addressRepository = addressRepository;
-        }
-
         public async Task<Guid> CreateOwner(Model.Owner ownerModel)
-        {
-            //Column does not allow nulls, so FullName / LastName needs to be cleaned up
+        {            
             var addressDB = new Entity.Address()
             {
                 AddressLineOne = ownerModel?.Address?.AddressLineOne,
@@ -105,5 +98,24 @@ namespace Defra.PTS.User.ApiServices.Implementation
                 throw new UserFunctionException("Cannot create Owner as Owner Model Cannot be Deserialized");
             }
         }
+
+        public async Task UpdateOwnerEmailsByOldEmail(string oldEmail, string newEmail)
+        {
+            if (string.IsNullOrEmpty(oldEmail) || string.IsNullOrEmpty(newEmail))
+                return;
+
+            var owners = await _ownerRepository.GetOwnersByEmailAsync(oldEmail);
+            if (owners != null && owners.Count != 0)
+            {
+                foreach (var owner in owners)
+                {
+                    owner.Email = newEmail;
+                    owner.UpdatedOn = DateTime.UtcNow;
+                    _ownerRepository.Update(owner);
+                }
+                await _ownerRepository.SaveChanges();
+            }
+        }
+
     }
 }

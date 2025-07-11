@@ -1,14 +1,12 @@
 ﻿using Defra.PTS.User.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 using Model = Defra.PTS.User.Models;
+using Entity = Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.ApiServices.Interface
 {
+    /// <summary>
+    /// IUserService
+    /// </summary>
     public interface IUserService
     {
         Task<Model.User> GetUserModel(Stream userStream);
@@ -20,5 +18,9 @@ namespace Defra.PTS.User.ApiServices.Interface
         Task<Model.UserEmail> GetUserEmailModel(Stream userStream);
         Task<bool> PerformHealthCheckLogic();
         Task<UserDetail> GetUserDetail(Guid contactId);
+        Task<Entity.User?> GetUserByContactId(Guid contactId);
+        Task<bool> DoesUserExistsByContactId(Guid contactId);
+        Task UpdateUserEmail(string oldEmail, string newEmail);
+        Task<Model.OwnerEmailUpdateModel> GetOwnerEmailUpdateModel(Stream inputStream);
     }
 }   

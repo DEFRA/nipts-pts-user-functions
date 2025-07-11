@@ -9,255 +9,639 @@ using Newtonsoft.Json;
 using NUnit.Framework;
 using testFunc = Defra.PTS.User.Functions.Functions.User;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Castle.Components.DictionaryAdapter;
 using Defra.PTS.User.Models;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Entity = Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Functions.Tests.Functions.User
 {
     public class UserTest
     {
-        private readonly Mock<HttpRequest> requestMoq = new();
+        private readonly Mock<HttpRequest> requestMock = new();
         private readonly Mock<ILogger> loggerMock = new();
-        private readonly Mock<IUserService> userServiceMoq = new();
+        private readonly Mock<IUserService> userServiceMock = new();
+        private readonly Mock<IOwnerService> ownerServiceMock = new();
         testFunc.User? sut;
 
         [SetUp]
         public void SetUp()
-        {            
-            sut = new testFunc.User(userServiceMoq.Object);
+        {
+            sut = new testFunc.User(userServiceMock.Object, ownerServiceMock.Object);
         }
 
         [TearDown]
         public void TearDown()
         {
-            requestMoq.Reset();
+            requestMock.Reset();
             loggerMock.Reset();
-            userServiceMoq.Reset();
+            userServiceMock.Reset();
+            ownerServiceMock.Reset();
         }
 
         [Test]
         public void CreateUser_WhenRequestDoesntExist_Then_ReturnsUserException()
         {
-            var expectedResult = $"Invalid user input, is NUll or Empty";
+            var expectedResult = "Invalid user input, is NULL or Empty";
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(null, loggerMock.Object));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedResult, result?.Message);
 
-            userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
+            userServiceMock.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
+            userServiceMock.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
+            userServiceMock.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]
         public void CreateUser_WhenRequestBodyDoesntExist_Then_ReturnsUserException()
         {
-            var expectedResult = $"Invalid user input, is NUll or Empty";                       
+            var expectedResult = "Invalid user input, is NULL or Empty";
 
-            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMoq.Object, loggerMock.Object));
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock.Object, loggerMock.Object));
 
             Assert.IsNotNull(result);
             Assert.AreEqual(expectedResult, result?.Message);
-
-            userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
         }
 
         [Test]
-        public void CreateUser_WhenRequestBodyExists_Then_ReturnsSuccessMessageWithValidGuid()
+        public async Task CreateUser_WhenRequestBodyExists_Then_ReturnsSuccessMessageWithValidGuid()
         {
-            Task<Guid> guid = Task.FromResult(Guid.NewGuid());
-            var expectedResult = guid.Result;
+            var guid = Guid.NewGuid();
             var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" }");
-            var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
 
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(new Model.User { Email = "test@example.com" });
+            userServiceMock.Setup(a => a.DoesUserExists(It.IsAny<string>())).ReturnsAsync(false);
+            userServiceMock.Setup(a => a.CreateUser(It.IsAny<Model.User>())).ReturnsAsync(guid);
 
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
-            userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(false));
-            userServiceMoq.Setup(a => a.CreateUser(It.IsAny<Model.User>())).Returns(guid);
-
-            var result = sut!.CreateUser(requestMoq.Object, loggerMock.Object);
-            var okResult = result.Result as OkObjectResult;
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+            var okResult = result as OkObjectResult;
 
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult?.StatusCode);
-            Assert.AreEqual(expectedResult, okResult?.Value);
-
-            userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Once);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Once);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Once);
+            Assert.AreEqual(guid, okResult?.Value);
         }
 
         [Test]
-        public void CreateUser_WhenRequestBodyExistsAndUserExists_Then_ReturnsSuccessMessageWithValidGuid()
+        public async Task CreateUser_WhenUserExists_Then_ReturnsExistingUserId()
         {
-            Task<Guid> guid = Task.FromResult(Guid.NewGuid());
-            var expectedResult = guid.Result;
+            var guid = Guid.NewGuid();
             var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" }");
-            var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
 
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(new Model.User { Email = "test@example.com" });
+            userServiceMock.Setup(a => a.DoesUserExists(It.IsAny<string>())).ReturnsAsync(true);
+            userServiceMock.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(guid);
+            userServiceMock.Setup(a => a.GetUserIdAsync(It.IsAny<string>())).ReturnsAsync(guid);
 
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
-            userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(true));
-            userServiceMoq.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).Returns(guid);
-            userServiceMoq.Setup(a => a.GetUserIdAsync(It.IsAny<string>())).Returns(guid);
-
-            var result = sut!.CreateUser(requestMoq.Object, loggerMock.Object);
-            var okResult = result.Result as OkObjectResult;
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+            var okResult = result as OkObjectResult;
 
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult?.StatusCode);
-            Assert.AreEqual(expectedResult, okResult?.Value);
-
-            userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Once);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Once);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
+            Assert.AreEqual(guid, okResult?.Value);
         }
 
         [Test]
-        public void UpdateUser_WhenRequestDoesntExist_Then_ReturnsUserException()
+        public async Task CreateUser_ContactIdExists_EmailUnchanged_ReturnsExistingUserId()
         {
-            var expectedResult = $"Invalid user input, is NUll or Empty";
-            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUser(null, loggerMock.Object));
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+            var email = "test@example.com";
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result?.Message);
+            var userModel = new Model.User { ContactId = contactId, Email = email };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = email };
 
-            userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
-        }
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
 
-        [Test]
-        public void UpdateUser_WhenRequestBodyDoesntExist_Then_ReturnsUserException()
-        {
-            var expectedResult = $"Invalid user input, is NUll or Empty";           
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.UpdateUser(email, "signin")).ReturnsAsync(existingUserId);
 
-            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUser(requestMoq.Object, loggerMock.Object));
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result?.Message);
-
-            userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
-        }
-
-        [Test]
-        public void UpdateUser_WhenRequestBodyExists_Then_ReturnsSuccessMessageWithValidGuid()
-        {
-            Task<Guid> guid = Task.FromResult(Guid.NewGuid());
-            var expectedResult = guid.Result;
-            var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" , \"Email\" : \"salim@test.co.uk\" }");
-            var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
-
-
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
-            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.UserEmail() { Email = "salim@test.co.uk", Type = "signin" }));
-            userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(true));
-            userServiceMoq.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).Returns(guid);
-
-            var result = sut!.UpdateUser(requestMoq.Object, loggerMock.Object);
-            var okResult = result.Result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult?.StatusCode);
-            Assert.AreEqual(expectedResult, okResult?.Value);
-
-
-            userServiceMoq.Verify(a => a.GetUserEmailModel(It.IsAny<Stream>()), Times.Once);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Once);
-            userServiceMoq.Verify(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>()), Times.Once);
-        }
-
-        [Test]
-        public void UpdateUser_WhenRequestBodyExists_Then_ReturnsErrorMessage()
-        {
-            Task<Guid> guid = Task.FromResult(Guid.NewGuid());
-            var expectedResult = $"Cannot update new User as user does not exists";
-            var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" , \"Email\" : \"salim@test.co.uk\" }");
-            var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
-
-
-            userServiceMoq.Setup(a => a.GetUserModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.User() { }));
-            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).Returns(Task.FromResult(new Model.UserEmail() { Email = "salim@test.co.uk", Type = "signin" }));
-            userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>())).Returns(Task.FromResult(false));
-            userServiceMoq.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).Returns(guid);
-
-            var result = sut!.UpdateUser(requestMoq.Object, loggerMock.Object);
-            var okResult = result.Result as OkObjectResult;
-            Assert.IsNotNull(okResult);
-            Assert.AreEqual(200, okResult?.StatusCode);
-            Assert.AreEqual(expectedResult, okResult?.Value);
-
-
-            userServiceMoq.Verify(a => a.GetUserEmailModel(It.IsAny<Stream>()), Times.Once);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Once);
-            userServiceMoq.Verify(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
-        }
-
-        [Test]
-        public void UpdateUserAddress_WhenRequestBodyDoesntExist_Then_ReturnsUserException()
-        {
-            var expectedResult = $"Invalid user input, is NUll or Empty";            
-
-            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUserAddress(requestMoq.Object, loggerMock.Object));
-
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result?.Message);
-
-            userServiceMoq.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
-            userServiceMoq.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
-            userServiceMoq.Verify(a => a.CreateUser(It.IsAny<Model.User>()), Times.Never);
-        }
-
-        [Test]
-        public async Task UpdateUserAddress_UserDoesNotExist()
-        {
-            var expectedResult = "Cannot update new User as user does not exists";
-
-            var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" , \"Email\" : \"salim@test.co.uk\" }");
-            var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
-
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
-            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>()))
-                .ReturnsAsync(new UserEmail() { Email = null, Type = "signin" });
-            userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>()))
-                .ReturnsAsync(false);
-
-            var result = await sut!.UpdateUserAddress(requestMoq.Object, loggerMock.Object);
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult?.StatusCode);
-            Assert.AreEqual(expectedResult, okResult?.Value);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
 
         [Test]
-        public async Task UpdateUserAddress()
-        {            
+        public async Task CreateUser_ContactIdExists_EmailChanged_UpdatesEmailsAndReturnsUserId()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+            var oldEmail = "old@example.com";
+            var newEmail = "new@example.com";
+
+            var userModel = new Model.User { ContactId = contactId, Email = newEmail };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = oldEmail };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.UpdateUserEmail(oldEmail, newEmail)).Returns(Task.CompletedTask);
+            ownerServiceMock.Setup(a => a.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail)).Returns(Task.CompletedTask);
+            userServiceMock.Setup(a => a.UpdateUser(newEmail, "signin")).ReturnsAsync(existingUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUserEmail(oldEmail, newEmail), Times.Once);
+            ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail), Times.Once);
+        }
+
+        [Test]
+        public async Task CreateUser_ContactIdNotFound_CreatesNewUser()
+        {
+            var contactId = Guid.NewGuid();
+            var newUserId = Guid.NewGuid();
+            var email = "new@example.com";
+
+            var userModel = new Model.User { ContactId = contactId, Email = email };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync((Entity.User?)null);
+            userServiceMock.Setup(a => a.DoesUserExists(email)).ReturnsAsync(false);
+            userServiceMock.Setup(a => a.CreateUser(userModel)).ReturnsAsync(newUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(newUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.CreateUser(userModel), Times.Once);
+        }
+
+        [Test]
+        public async Task CreateUser_ContactIdNotFound_UserExists_ReturnsExistingUserId()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+            var email = "existing@example.com";
+
+            var userModel = new Model.User { ContactId = contactId, Email = email };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync((Entity.User?)null);
+            userServiceMock.Setup(a => a.DoesUserExists(email)).ReturnsAsync(true);
+            userServiceMock.Setup(a => a.UpdateUser(email, "signin")).ReturnsAsync(existingUserId);
+            userServiceMock.Setup(a => a.GetUserIdAsync(email)).ReturnsAsync(existingUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUser(email, "signin"), Times.Once);
+            userServiceMock.Verify(a => a.GetUserIdAsync(email), Times.Once);
+        }
+
+        [Test]
+        public async Task CreateUser_NoContactId_FallsBackToEmailLogic()
+        {
+            var email = "test@example.com";
+            var newUserId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = null, Email = email };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.DoesUserExists(email)).ReturnsAsync(false);
+            userServiceMock.Setup(a => a.CreateUser(userModel)).ReturnsAsync(newUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(newUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never);
+            userServiceMock.Verify(a => a.DoesUserExists(email), Times.Once);
+        }
+
+        [Test]
+        public async Task CreateUser_EmptyContactId_FallsBackToEmailLogic()
+        {
+            var email = "test@example.com";
+            var newUserId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = Guid.Empty, Email = email };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.DoesUserExists(email)).ReturnsAsync(false);
+            userServiceMock.Setup(a => a.CreateUser(userModel)).ReturnsAsync(newUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(newUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never);
+        }
+
+        [Test]
+        public async Task CreateUser_EmailUpdateThrowsException_ContinuesExecution()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+            var oldEmail = "old@example.com";
+            var newEmail = "new@example.com";
+
+            var userModel = new Model.User { ContactId = contactId, Email = newEmail };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = oldEmail };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.UpdateUserEmail(oldEmail, newEmail)).ThrowsAsync(new Exception("Database error"));
+            userServiceMock.Setup(a => a.UpdateUser(newEmail, "signin")).ReturnsAsync(existingUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+        }
+
+        [Test]
+        public async Task CreateUser_SignInUpdateThrowsException_ContinuesExecution()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+            var email = "test@example.com";
+
+            var userModel = new Model.User { ContactId = contactId, Email = email };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = email };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.UpdateUser(email, "signin")).ThrowsAsync(new Exception("Sign-in update failed"));
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+        }
+
+        [Test]
+        public void CreateUser_WhenUserModelIsNull_ThrowsException()
+        {
+            var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" }");
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+#pragma warning disable CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync((Model.User?)null);
+#pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
+
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock.Object, loggerMock.Object));
+            Assert.AreEqual("Failed to parse user model from input data", result!.Message);
+        }
+
+        [Test]
+        public void CreateUser_WhenNoContactIdAndNoEmail_ThrowsException()
+        {
+            var userModel = new Model.User { ContactId = null, Email = "" };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock.Object, loggerMock.Object));
+            Assert.AreEqual("User model must have either ContactId or Email", result!.Message);
+        }
+
+        [Test]
+        public async Task CreateUser_EmailsAreEmpty_SkipsEmailUpdate()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = contactId, Email = "" };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = "" };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public async Task CreateUser_OnlyOldEmailEmpty_SkipsEmailUpdate()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = contactId, Email = "new@example.com" };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = "" };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.UpdateUser("new@example.com", "signin")).ReturnsAsync(existingUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public async Task CreateUser_OnlyNewEmailEmpty_SkipsEmailUpdate()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = contactId, Email = "" };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = "old@example.com" };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            userServiceMock.Verify(a => a.UpdateUser(It.IsAny<string>(), "signin"), Times.Never);
+        }
+
+        [Test]
+        public async Task UpdateUser_WhenValidData_ReturnsGuid()
+        {
+            var guid = Guid.NewGuid();
+            var json = JsonConvert.SerializeObject("{ \"Email\" : \"test@example.com\" }");
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).ReturnsAsync(new UserEmail { Email = "test@example.com", Type = "signin" });
+            userServiceMock.Setup(a => a.DoesUserExists(It.IsAny<string>())).ReturnsAsync(true);
+            userServiceMock.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(guid);
+
+            var result = await sut!.UpdateUser(requestMock.Object, loggerMock.Object);
+            var okResult = result as OkObjectResult;
+
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(guid, okResult?.Value);
+        }
+
+        [Test]
+        public async Task UpdateUser_WhenUserDoesNotExist_ReturnsErrorMessage()
+        {
+            var json = JsonConvert.SerializeObject("{ \"Email\" : \"test@example.com\" }");
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).ReturnsAsync(new UserEmail { Email = "test@example.com", Type = "signin" });
+            userServiceMock.Setup(a => a.DoesUserExists(It.IsAny<string>())).ReturnsAsync(false);
+
+            var result = await sut!.UpdateUser(requestMock.Object, loggerMock.Object);
+            var okResult = result as OkObjectResult;
+
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual("Cannot update new User as user does not exists", okResult?.Value);
+        }
+
+        [Test]
+        public void UpdateUser_WhenRequestIsNull_ThrowsException()
+        {
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUser(null, loggerMock.Object));
+            Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+        }
+
+        [Test]
+        public void UpdateUser_WhenRequestBodyIsNull_ThrowsException()
+        {
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUser(requestMock.Object, loggerMock.Object));
+            Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+        }
+
+        [Test]
+        public async Task UpdateUserAddress_WhenValidData_ReturnsGuid()
+        {
             var userId = Guid.NewGuid();
-            
-            var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" , \"Email\" : \"salim@test.co.uk\" }");
-            var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
+            var json = JsonConvert.SerializeObject("{ \"Email\" : \"test@example.com\" }");
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
 
-            requestMoq.Setup(a => a.Body).Returns(memoryStream);
-            userServiceMoq.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>()))
-                .ReturnsAsync(new UserEmail() { Email = "test@email.com", Type = "signin"});
-            userServiceMoq.Setup(a => a.DoesUserExists(It.IsAny<string>()))
-                .ReturnsAsync(true);
-            userServiceMoq.Setup(x => x.UpdateUser(It.IsAny<string>(), It.IsAny<Guid?>()))
-                .ReturnsAsync(userId);
+            userServiceMock.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).ReturnsAsync(new UserEmail { Email = "test@example.com", Type = "signin" });
+            userServiceMock.Setup(a => a.DoesUserExists(It.IsAny<string>())).ReturnsAsync(true);
+            userServiceMock.Setup(a => a.UpdateUser(It.IsAny<string>(), It.IsAny<Guid?>())).ReturnsAsync(userId);
 
-            var result = await sut!.UpdateUserAddress(requestMoq.Object, loggerMock.Object);
+            var result = await sut!.UpdateUserAddress(requestMock.Object, loggerMock.Object);
+            var okResult = result as OkObjectResult;
+
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(userId, okResult?.Value);
+        }
+
+        [Test]
+        public async Task UpdateUserAddress_WhenUserDoesNotExist_ReturnsErrorMessage()
+        {
+            var json = JsonConvert.SerializeObject("{ \"Email\" : \"test@example.com\" }");
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserEmailModel(It.IsAny<Stream>())).ReturnsAsync(new UserEmail { Email = "test@example.com", Type = "signin" });
+            userServiceMock.Setup(a => a.DoesUserExists(It.IsAny<string>())).ReturnsAsync(false);
+
+            var result = await sut!.UpdateUserAddress(requestMock.Object, loggerMock.Object);
+            var okResult = result as OkObjectResult;
+
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual("Cannot update new User as user does not exists", okResult?.Value);
+        }
+
+        [Test]
+        public void UpdateUserAddress_WhenRequestIsNull_ThrowsException()
+        {
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUserAddress(null, loggerMock.Object));
+            Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+        }
+
+        [Test]
+        public void UpdateUserAddress_WhenRequestBodyIsNull_ThrowsException()
+        {
+            var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUserAddress(requestMock.Object, loggerMock.Object));
+            Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+        }
+
+        [Test]
+        public async Task CreateUser_ContactIdExists_EmailNull_SkipsEmailAndSignInUpdate()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = contactId, Email = null };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = "existing@example.com" };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUser(It.IsAny<string>(), "signin"), Times.Never);
+        }
+
+        [Test]
+        public async Task CreateUser_ExistingUserEmailNull_SkipsEmailUpdate()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = contactId, Email = "new@example.com" };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = null };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.UpdateUser("new@example.com", "signin")).ReturnsAsync(existingUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+
+            userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+            userServiceMock.Verify(a => a.UpdateUser("new@example.com", "signin"), Times.Once);
+        }
+
+        [Test]
+        public async Task CreateUser_OwnerUpdateFails_StillSucceeds()
+        {
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+            var oldEmail = "old@example.com";
+            var newEmail = "new@example.com";
+
+            var userModel = new Model.User { ContactId = contactId, Email = newEmail };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = oldEmail };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.UpdateUserEmail(oldEmail, newEmail)).Returns(Task.CompletedTask);
+            ownerServiceMock.Setup(a => a.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail)).ThrowsAsync(new Exception("Owner update failed"));
+            userServiceMock.Setup(a => a.UpdateUser(newEmail, "signin")).ReturnsAsync(existingUserId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
+            var okResult = result as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(200, okResult?.StatusCode);
+            Assert.AreEqual(existingUserId, okResult?.Value);
+        }
+
+        [Test]
+        public async Task CreateUser_EmailUpdateFailsWithSignInSucceeds_ReturnsSuccess()
+        {
+            var email = "test@example.com";
+            var userId = Guid.NewGuid();
+
+            var userModel = new Model.User { ContactId = null, Email = email };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            requestMock.Setup(a => a.Body).Returns(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.DoesUserExists(email)).ReturnsAsync(true);
+            userServiceMock.Setup(a => a.UpdateUser(email, "signin")).ThrowsAsync(new Exception("Update failed"));
+            userServiceMock.Setup(a => a.GetUserIdAsync(email)).ReturnsAsync(userId);
+
+            var result = await sut!.CreateUser(requestMock.Object, loggerMock.Object);
+
             var okResult = result as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(200, okResult?.StatusCode);

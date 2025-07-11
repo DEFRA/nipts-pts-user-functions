@@ -2,32 +2,17 @@
 using Defra.PTS.User.Repositories.Interface;
 using Entity = Defra.PTS.User.Entities;
 using Model = Defra.PTS.User.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using System.Text.Json;
-using Defra.PTS.User.Models.Enums;
 using Defra.PTS.User.Models.CustomException;
-using Defra.PTS.User.Repositories;
-using static System.Net.Mime.MediaTypeNames;
 using Defra.PTS.User.Entities;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.User.ApiServices.Implementation
 {    
-    public class UserService : IUserService
+    public class UserService(IUserRepository userRepository) : IUserService
     {        
-        private readonly IUserRepository _userRepository;
-        
-        public UserService(IUserRepository userRepository)
-        {            
-            _userRepository = userRepository;            
-        }
-
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        private readonly IUserRepository _userRepository = userRepository;
+        private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
@@ -38,9 +23,9 @@ namespace Defra.PTS.User.ApiServices.Implementation
             {
                 Email = userModel.Email,
                 FullName = userModel.FullName,
-                FirstName = userModel.FirstName,
-                LastName = userModel.LastName,
-                Role = userModel.Role,
+                FirstName = userModel.FirstName!,
+                LastName = userModel.LastName!,
+                Role = userModel.Role!,
                 Telephone = userModel.Telephone,
                 ContactId = userModel.ContactId,
                 Uniquereference = userModel.Uniquereference,
@@ -141,6 +126,45 @@ namespace Defra.PTS.User.ApiServices.Implementation
         public async Task<UserDetail> GetUserDetail(Guid contactId)
         {
             return await _userRepository.GetUserDetail(contactId);
+        }
+
+        public async Task<Entity.User?> GetUserByContactId(Guid contactId)
+        {
+            return await _userRepository.GetUserByContactId(contactId);
+        }
+
+        public async Task<bool> DoesUserExistsByContactId(Guid contactId)
+        {
+            return await _userRepository.DoesUserExistsByContactId(contactId);
+        }
+
+        public async Task UpdateUserEmail(string oldEmail, string newEmail)
+        {
+            if (string.IsNullOrEmpty(oldEmail) || string.IsNullOrEmpty(newEmail))
+                return;
+
+            var user = await _userRepository.GetUser(oldEmail);
+            if (user != null)
+            {
+                user.Email = newEmail;
+                user.UpdatedOn = DateTime.UtcNow;
+                _userRepository.Update(user);
+                await _userRepository.SaveChanges();
+            }
+        }
+
+        public async Task<Model.OwnerEmailUpdateModel> GetOwnerEmailUpdateModel(Stream inputStream)
+        {
+            try
+            {
+                string content = await new StreamReader(inputStream).ReadToEndAsync();
+                Model.OwnerEmailUpdateModel? model = JsonSerializer.Deserialize<Model.OwnerEmailUpdateModel>(content, _jsonOptions);
+                return model!;
+            }
+            catch
+            {
+                throw new UserFunctionException("Cannot deserialize OwnerEmailUpdateModel");
+            }
         }
 
     }
