@@ -23,7 +23,7 @@ namespace Defra.PTS.User.Functions.Functions.User
         private const string UpdateUserAddressTagName = "UpdateUserAddress";
 
         [FunctionName("CreateUser")]
-        [OpenApiOperation(operationId: "CreateUser", tags: new[] { CreateUserTagName })]
+        [OpenApiOperation(operationId: "CreateUser", tags: CreateUserTagName)]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.User), Description = "Create User")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
@@ -139,7 +139,7 @@ namespace Defra.PTS.User.Functions.Functions.User
         /// <param name="log"></param>
         /// <returns></returns>
         [FunctionName("UpdateUser")]
-        [OpenApiOperation(operationId: "UpdateUser", tags: new[] { UpdateUserTagName })]
+        [OpenApiOperation(operationId: "UpdateUser", tags: UpdateUserTagName )]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.UserEmail), Description = "UpdateUser")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
@@ -167,7 +167,7 @@ namespace Defra.PTS.User.Functions.Functions.User
         /// <param name="log"></param>
         /// <returns></returns>
         [FunctionName("UpdateUserAddress")]
-        [OpenApiOperation(operationId: "UpdateUserAddress", tags: new[] { UpdateUserAddressTagName })]
+        [OpenApiOperation(operationId: "UpdateUserAddress", tags: UpdateUserAddressTagName )]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.UserEmail), Description = "UpdateUserAddress")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
