@@ -35,7 +35,7 @@ namespace Defra.PTS.User.Functions.Functions.Address
         /// <param name="req"></param>        
         /// <returns></returns>
         [FunctionName("CreateAddress")]
-        [OpenApiOperation(operationId: "CreateAddress", tags: new[] { TagName })]
+        [OpenApiOperation(operationId: "CreateAddress", tags: TagName )]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.Address), Description = "Create Address")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]

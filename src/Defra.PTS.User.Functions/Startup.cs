@@ -18,7 +18,6 @@ namespace Defra.PTS.User.Functions
     {
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
         {
-            var context = builder.GetContext();
 
             builder.ConfigurationBuilder
                 .SetBasePath(Directory.GetCurrentDirectory())

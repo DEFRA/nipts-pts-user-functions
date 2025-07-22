@@ -24,7 +24,7 @@ namespace Defra.PTS.User.Functions.Functions
         }
 
         [FunctionName("HealthCheck")]
-        [OpenApiOperation(operationId: "Run", tags: new[] { TagName })]
+        [OpenApiOperation(operationId: "Run", tags: TagName )]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "health")] HttpRequest req
