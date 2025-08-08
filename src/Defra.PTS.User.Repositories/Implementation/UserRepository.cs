@@ -13,7 +13,7 @@ using Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories.Implementation
 {
-    public class UserRepository : Repository<Entity.User>, IUserRepository
+    public class UserRepository(DbContext dbContext) : Repository<Entity.User>(dbContext), IUserRepository
     {
 
         private UserDbContext? UserContext
@@ -22,10 +22,6 @@ namespace Defra.PTS.User.Repositories.Implementation
             {
                 return _dbContext as UserDbContext;
             }
-        }
-
-        public UserRepository(DbContext dbContext) : base(dbContext)
-        {
         }
 
         public async Task<bool> DoesUserExists(string userEmailAddress)
@@ -57,7 +53,7 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public async Task<UserDetail> GetUserDetail(Guid contactId)
         {
-            var user = await UserContext?.User.Where(u => u.ContactId == contactId).FirstOrDefaultAsync()!;
+            var user = await UserContext?.User.Where(u => u.ContactId == contactId).OrderByDescending(a => a.CreatedOn).FirstOrDefaultAsync()!;
             var address = await UserContext?.Address.Where(a => a.Id == user!.AddressId).FirstOrDefaultAsync()!;
 
             return new UserDetail
@@ -74,5 +70,23 @@ namespace Defra.PTS.User.Repositories.Implementation
             };
         }
 
+        public async Task<Entity.User?> GetUserByContactId(Guid contactId)
+        {
+            if (UserContext?.User == null)
+                return null;
+
+            return await UserContext.User
+                .Where(u => u.ContactId == contactId)
+                .OrderByDescending(u => u.CreatedOn)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> DoesUserExistsByContactId(Guid contactId)
+        {
+            if (UserContext?.User == null)
+                return false;
+
+            return await UserContext.User.AnyAsync(u => u.ContactId == contactId);
+        }
     }
 }

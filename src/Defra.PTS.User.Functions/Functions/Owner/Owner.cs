@@ -35,7 +35,7 @@ namespace Defra.PTS.User.Functions.Functions.Owner
         /// <param name="log"></param>
         /// <returns></returns>
         [FunctionName("CreateOwner")]
-        [OpenApiOperation(operationId: "CreateOwner", tags: new[] { TagName })]
+        [OpenApiOperation(operationId: "CreateOwner", tags: TagName )]
         [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.Owner), Description = "Create Traveller")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]

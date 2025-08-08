@@ -36,7 +36,7 @@ public class GetUserDetail
     }
 
     [FunctionName(nameof(GetUserDetail))]
-    [OpenApiOperation(operationId: nameof(GetUserDetail), tags: new[] { TagName })]
+    [OpenApiOperation(operationId: nameof(GetUserDetail), tags: TagName )]
     [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
     [OpenApiParameter(name: "userId", In = ParameterLocation.Path, Required = true, Type = typeof(string), Description = "The **UserId** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(List<UserDetail>), Description = "OK")]
