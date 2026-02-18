@@ -8,7 +8,9 @@
   "logging": {
     "fileLoggingMode": "debugOnly",
     "logLevel": {
-      "default": "Information"
+      "default": "Information",
+      "Function": "Information",
+      "Host.Aggregator": "Information"
     },
     "applicationInsights": {
       "samplingSettings": {
@@ -17,5 +19,9 @@
       },
       "enableLiveMetricsFilters": true
     }
+  },
+  "concurrency": {
+    "dynamicConcurrencyEnabled": true,
+    "maximumFunctionConcurrency": 500
   }
 }

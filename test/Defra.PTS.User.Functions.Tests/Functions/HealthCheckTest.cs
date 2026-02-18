@@ -1,59 +1,51 @@
-﻿using Model = Defra.PTS.User.Models;
-using Defra.PTS.User.ApiServices.Interface;
-using Defra.PTS.User.Models.CustomException;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Defra.PTS.User.ApiServices.Interface;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Newtonsoft.Json;
 using NUnit.Framework;
 using testFunc = Defra.PTS.User.Functions.Functions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Castle.Components.DictionaryAdapter;
-using Defra.PTS.User.Models;
+using System.Net;
+using Defra.PTS.User.Functions.Tests.Helpers;
 
 namespace Defra.PTS.User.Functions.Tests.Functions.User
 {
     public class HealthCheckTest
     {
-        private Mock<HttpRequest>? requestMoq;
-        private Mock<ILogger>? loggerMock;
-        private Mock<IUserService>? userServiceMoq;
+     private Mock<IUserService>? userServiceMoq;
+     private Mock<ILogger<testFunc.HealthCheck>>? loggerMock;
         testFunc.HealthCheck? sut;
 
         [SetUp] 
         public void SetUp()
-        {
-            requestMoq = new Mock<HttpRequest>();
-            loggerMock = new Mock<ILogger>();
+    {
+  loggerMock = new Mock<ILogger<testFunc.HealthCheck>>();
             userServiceMoq = new Mock<IUserService>();
-
-            sut = new testFunc.HealthCheck(userServiceMoq.Object);
+       sut = new testFunc.HealthCheck(userServiceMoq.Object, loggerMock.Object);
         }
 
         [Test]
-        public void HealthCheck_WhenTrue_Then_ReturnsServiceAvailable()
-        {            
+  public async Task HealthCheck_WhenTrue_Then_ReturnsServiceAvailable()
+ {
+   var requestMoq = HttpRequestDataHelper.CreateMockHttpRequestData();
             userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(true));
-            var result = sut!.Run(requestMoq!.Object, loggerMock!.Object);
-            var okResult = result.Result as OkResult;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(200, okResult?.StatusCode);
-            userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
+          
+     var result = await sut!.Run(requestMoq.Object);
+         
+ Assert.IsNotNull(result);
+       Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+  userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
         }
 
         [Test]
-        public void HealthCheck_WhenFalse_Then_ReturnsServiceUnavailable()
+        public async Task HealthCheck_WhenFalse_Then_ReturnsServiceUnavailable()
         {
-            userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(false));
-            var result = sut!.Run(requestMoq!.Object, loggerMock!.Object);
-            var okResult = result.Result as StatusCodeResult;
-            Assert.IsNotNull(result);
-            Assert.AreEqual(503, okResult?.StatusCode);
+     var requestMoq = HttpRequestDataHelper.CreateMockHttpRequestData();
+     userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(false));
+            
+            var result = await sut!.Run(requestMoq.Object);
+       
+       Assert.IsNotNull(result);
+       Assert.AreEqual(HttpStatusCode.ServiceUnavailable, result.StatusCode);
             userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
         }
     }
