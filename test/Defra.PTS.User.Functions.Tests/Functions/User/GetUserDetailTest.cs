@@ -11,48 +11,52 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 {    
     public class GetUserDetailTest
     {
-    private Mock<IUserService> _mockUserService = new();
-private Mock<ILogger<GetUserDetail>> _mockLogger = new();
-     private GetUserDetail? _sut;
+private Mock<IUserService> _mockUserService = new();
+        private Mock<ILogger<GetUserDetail>> _mockLogger = new();
+   private GetUserDetail? _sut;
 
-      [SetUp]
-  public void Setup()
+    [SetUp]
+        public void Setup()
         {
-      _mockUserService = new Mock<IUserService>();
+          _mockUserService = new Mock<IUserService>();
  _mockLogger = new Mock<ILogger<GetUserDetail>>();
-            _sut = new GetUserDetail(_mockUserService.Object, _mockLogger.Object);
- }
+         _sut = new GetUserDetail(_mockUserService.Object, _mockLogger.Object);
+     }
 
-        [TearDown]
+  [TearDown]
         public void TearDown()
-    {
-      _mockLogger.Reset();
-  _mockUserService.Reset();
+        {
+ _mockLogger.Reset();
+      _mockUserService.Reset();
         }
 
         [Test]
         public async Task GetUserDetail_InvalidUserId()
         {
      var userId = "Invalid Id";
-            var expectedValue = "You must provide a valid value for userId";
-      var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
+     var expectedValue = "You must provide a valid value for userId";
+         var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
 
-          var result = await _sut!.Run(requestMock.Object, userId);
-   
-Assert.IsNotNull(result);
-    Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
-    }
+         var result = await _sut!.Run(requestMock, userId);
+            
+      TestContext.WriteLine($"Actual Status Code: {result.StatusCode}");
+      TestContext.WriteLine($"UserId tested: {userId}");
+  TestContext.WriteLine($"Can parse: {Guid.TryParse(userId, out var testGuid)}");
+            
+            Assert.IsNotNull(result);
+     Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+        }
 
         [Test]
         public async Task GetUserDetail()
-        {
-         var userId = Guid.NewGuid().ToString();
-      var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
+  {
+     var userId = Guid.NewGuid().ToString();
+            var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
 
-            var result = await _sut!.Run(requestMock.Object, userId);
-            
-            Assert.IsNotNull(result);
-   Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+     var result = await _sut!.Run(requestMock, userId);
+      
+Assert.IsNotNull(result);
+        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
         }
-    }
+  }
 }

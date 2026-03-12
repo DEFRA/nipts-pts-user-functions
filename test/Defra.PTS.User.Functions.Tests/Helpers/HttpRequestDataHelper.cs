@@ -1,53 +1,49 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
+using Azure.Core.Serialization;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace Defra.PTS.User.Functions.Tests.Helpers
 {
     public static class HttpRequestDataHelper
     {
-        public static Mock<HttpRequestData> CreateMockHttpRequestData(Stream? body = null, FunctionContext? context = null)
+        /// <summary>
+        /// Creates a FakeHttpRequestData that works with the real CreateResponse extension method
+        /// </summary>
+        public static FakeHttpRequestData CreateMockHttpRequestData(Stream? body = null, FunctionContext? context = null)
         {
             var mockContext = context ?? CreateMockFunctionContext();
-var mockRequest = new Mock<HttpRequestData>(mockContext);
-
-  if (body != null)
-   {
-     mockRequest.Setup(r => r.Body).Returns(body);
-         }
-
-            mockRequest.Setup(r => r.CreateResponse()).Returns(() =>
-     {
-        var response = new Mock<HttpResponseData>(mockContext);
-            response.SetupProperty(r => r.StatusCode);
-        response.SetupProperty(r => r.Headers, new HttpHeadersCollection());
-   response.Setup(r => r.Body).Returns(new MemoryStream());
-                return response.Object;
-   });
-
-        return mockRequest;
+            return new FakeHttpRequestData(mockContext, body: body);
         }
 
         public static FunctionContext CreateMockFunctionContext()
         {
-        var mockContext = new Mock<FunctionContext>();
-      var serviceProvider = new Mock<IServiceProvider>();
-      mockContext.Setup(c => c.InstanceServices).Returns(serviceProvider.Object);
-            return mockContext.Object;
-        }
+            var services = new ServiceCollection();
+            services.AddOptions<WorkerOptions>().Configure(options =>
+                {
+                    options.Serializer = new JsonObjectSerializer(new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true,
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                    });
+                });
+            
+            var serviceProvider = services.BuildServiceProvider();
 
-    public static Mock<HttpResponseData> CreateMockHttpResponseData(FunctionContext? context = null, HttpStatusCode statusCode = HttpStatusCode.OK)
-        {
-          var mockContext = context ?? CreateMockFunctionContext();
-var mockResponse = new Mock<HttpResponseData>(mockContext);
-            
-          mockResponse.SetupProperty(r => r.StatusCode, statusCode);
-          mockResponse.SetupProperty(r => r.Headers, new HttpHeadersCollection());
-       mockResponse.Setup(r => r.Body).Returns(new MemoryStream());
-            
-      return mockResponse;
-        }
+            // Use Mock<FunctionContext> to avoid needing to implement all abstract members
+            var mockContext = new Mock<FunctionContext>();
+            mockContext.Setup(c => c.InstanceServices).Returns(serviceProvider);
+            mockContext.Setup(c => c.InvocationId).Returns(Guid.NewGuid().ToString());
+            mockContext.Setup(c => c.FunctionId).Returns(Guid.NewGuid().ToString());
+            mockContext.Setup(c => c.Features).Returns(Mock.Of<IInvocationFeatures>());
+            mockContext.Setup(c => c.Items).Returns(new Dictionary<object, object>());
+        
+             return mockContext.Object;
+         }
     }
 }

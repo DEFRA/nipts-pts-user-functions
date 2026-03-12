@@ -35,22 +35,24 @@ public class GetUserDetail
     [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
     [OpenApiParameter(name: "userId", In = ParameterLocation.Path, Required = true, Type = typeof(string), Description = "The **UserId** parameter")]
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(List<UserDetail>), Description = "OK")]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(string), Description = "BAD REQUEST")]
-    public async Task<HttpResponseData> Run(
-   [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "GetUserDetail/{userId}")] HttpRequestData req, string userId)
-    {
+  [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(string), Description = "BAD REQUEST")]
+  public async Task<HttpResponseData> Run(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "GetUserDetail/{userId}")] HttpRequestData req, string userId)
+  {
         _logger.LogInformation($"{nameof(GetUserDetail)} HTTP trigger function processed a request.");
 
-  if (!Guid.TryParse(userId, out Guid userGuid))
+     if (!Guid.TryParse(userId, out Guid userGuid))
    {
-            var badResponse = req.CreateResponse(HttpStatusCode.BadRequest);
-    await badResponse.WriteAsJsonAsync("You must provide a valid value for userId");
-   return badResponse;
+            var badResponse = req.CreateResponse();
+    badResponse.StatusCode = HttpStatusCode.BadRequest;
+            await badResponse.WriteStringAsync("You must provide a valid value for userId");
+     return badResponse;
         }
 
-     var result = await _userService.GetUserDetail(userGuid);
+        var result = await _userService.GetUserDetail(userGuid);
 
-        var response = req.CreateResponse(HttpStatusCode.OK);
+     var response = req.CreateResponse();
+   response.StatusCode = HttpStatusCode.OK;
         await response.WriteAsJsonAsync(result);
         return response;
     }

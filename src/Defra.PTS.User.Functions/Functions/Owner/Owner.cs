@@ -34,8 +34,13 @@ namespace Defra.PTS.User.Functions.Functions.Owner
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.Owner), Description = "Create Traveller")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<HttpResponseData> CreateTraveller(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createowner")] HttpRequestData req)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createowner")] HttpRequestData? req)
         {
+            if (req == null)
+            {
+                throw new UserFunctionException("Invalid Owner input, is NUll or Empty");
+            }
+
             var inputData = req.Body ?? throw new UserFunctionException("Invalid Owner input, is NUll or Empty");
 
             var ownerModel = await _ownerService.GetOwnerModel(inputData);
