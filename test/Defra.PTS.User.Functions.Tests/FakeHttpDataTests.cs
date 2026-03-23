@@ -39,10 +39,10 @@ namespace Defra.PTS.User.Functions.Tests
         {
             var request = HttpRequestDataHelper.CreateMockHttpRequestData();
 
-            // Use the real extension method pattern
+            // Use the real extension method pattern - set status code AFTER writing content
             var badResponse = request.CreateResponse();
-            badResponse.StatusCode = HttpStatusCode.BadRequest;
             await badResponse.WriteAsJsonAsync("test");
+            badResponse.StatusCode = HttpStatusCode.BadRequest;
 
             Assert.AreEqual(HttpStatusCode.BadRequest, badResponse.StatusCode);
         }
