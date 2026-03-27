@@ -347,3 +347,4 @@ ASALocalRun/
 /src/Defra.Trade.EUCerts.UI.Vue/.sonarqube
 /src/Defra.Trade.EUCerts.UI.Vue/.config/dotnet-tools.json
 /src/Defra.PTS.User.Functions/local.settings.json
+/docs
