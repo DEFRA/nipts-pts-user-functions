@@ -4,9 +4,6 @@ using Defra.PTS.User.Models.CustomException;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
-using Microsoft.OpenApi.Models;
 using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.Functions.Functions.Owner
@@ -29,10 +26,6 @@ namespace Defra.PTS.User.Functions.Functions.Owner
         /// <param name="req"></param>
         /// <returns></returns>
         [Function("CreateOwner")]
-        [OpenApiOperation(operationId: "CreateOwner", tags: TagName)]
-        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.Owner), Description = "Create Traveller")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<HttpResponseData> CreateTraveller(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createowner")] HttpRequestData? req)
         {

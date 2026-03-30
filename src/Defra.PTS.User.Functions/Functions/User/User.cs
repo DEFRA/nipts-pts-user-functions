@@ -5,9 +5,6 @@ using Defra.PTS.User.Models.CustomException;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
-using Microsoft.OpenApi.Models;
 using Model = Defra.PTS.User.Models;
 using Entity = Defra.PTS.User.Entities;
 
@@ -20,10 +17,6 @@ namespace Defra.PTS.User.Functions.Functions.User
         private const string UpdateUserAddressTagName = "UpdateUserAddress";
 
       [Function("CreateUser")]
-     [OpenApiOperation(operationId: "CreateUser", tags: CreateUserTagName)]
-  [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.User), Description = "Create User")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<HttpResponseData> CreateUser(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createuser")] HttpRequestData? req)
         {
@@ -147,10 +140,6 @@ Guid userId = await userService.CreateUser(userModel);
   /// <param name="req"></param>
         /// <returns></returns>
    [Function("UpdateUser")]
-        [OpenApiOperation(operationId: "UpdateUser", tags: UpdateUserTagName)]
-  [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.UserEmail), Description = "UpdateUser")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<HttpResponseData> UpdateUser(
      [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuser")] HttpRequestData? req)
      {
@@ -184,10 +173,6 @@ Guid userId = await userService.CreateUser(userModel);
         /// <param name="req"></param>
         /// <returns></returns>
         [Function("UpdateUserAddress")]
-        [OpenApiOperation(operationId: "UpdateUserAddress", tags: UpdateUserAddressTagName)]
-        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.UserEmail), Description = "UpdateUserAddress")]
-  [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
         public async Task<HttpResponseData> UpdateUserAddress(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuseraddress")] HttpRequestData? req)
         {

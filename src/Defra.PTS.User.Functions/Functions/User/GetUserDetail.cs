@@ -4,9 +4,6 @@ using Defra.PTS.User.Entities;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
-using Microsoft.OpenApi.Models;
 
 namespace Defra.PTS.User.Functions.Functions.User;
 
@@ -31,12 +28,7 @@ public class GetUserDetail
     }
 
     [Function(nameof(GetUserDetail))]
-    [OpenApiOperation(operationId: nameof(GetUserDetail), tags: TagName)]
-    [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-    [OpenApiParameter(name: "userId", In = ParameterLocation.Path, Required = true, Type = typeof(string), Description = "The **UserId** parameter")]
-    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(List<UserDetail>), Description = "OK")]
-  [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "application/json", bodyType: typeof(string), Description = "BAD REQUEST")]
-  public async Task<HttpResponseData> Run(
+    public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "GetUserDetail/{userId}")] HttpRequestData req, string userId)
   {
         _logger.LogInformation($"{nameof(GetUserDetail)} HTTP trigger function processed a request.");

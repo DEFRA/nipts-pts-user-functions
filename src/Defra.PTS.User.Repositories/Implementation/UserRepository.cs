@@ -37,15 +37,20 @@ namespace Defra.PTS.User.Repositories.Implementation
         [ExcludeFromCodeCoverage]
         public async Task<bool> PerformHealthCheckLogic()
         {
-            // Attempt to open a connection to the database
-            await UserContext!.Database.OpenConnectionAsync();
-
-            // Check if the connection is open
-            if (UserContext.Database.GetDbConnection().State == ConnectionState.Open)
+            try
             {
-                return true;
+                // Attempt to open a connection to the database
+                await UserContext!.Database.OpenConnectionAsync();
+
+                // Check if the connection is open
+                bool isOpen = UserContext.Database.GetDbConnection().State == ConnectionState.Open;
+                
+                // Close the connection to prevent connection leaks
+                await UserContext.Database.CloseConnectionAsync();
+                
+                return isOpen;
             }
-            else
+            catch
             {
                 return false;
             }
