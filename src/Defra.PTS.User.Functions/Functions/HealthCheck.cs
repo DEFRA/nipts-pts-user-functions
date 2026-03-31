@@ -1,49 +1,37 @@
-using System.IO;
 using System.Net;
-using System.Threading.Tasks;
 using Defra.PTS.User.ApiServices.Interface;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 
 namespace Defra.PTS.User.Functions.Functions
 {
     public class HealthCheck
     {
         private readonly IUserService _userService;
+        private readonly ILogger<HealthCheck> _logger;
         private const string TagName = "name";
 
-        public HealthCheck(IUserService userService)
+        public HealthCheck(IUserService userService, ILogger<HealthCheck> logger)
         {
             _userService = userService;
+            _logger = logger;
         }
 
-        [FunctionName("HealthCheck")]
-        [OpenApiOperation(operationId: "Run", tags: TagName )]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "text/plain", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "health")] HttpRequest req
-            , ILogger log)
+        [Function("HealthCheck")]
+        public async Task<HttpResponseData> Run(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "health")] HttpRequestData req)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
 
             // Perform health check logic here
             bool isHealthy = await _userService.PerformHealthCheckLogic();
 
-            if (isHealthy)
-            {
-                return new OkResult();
-            }
-            else
-            {
-                return new StatusCodeResult(StatusCodes.Status503ServiceUnavailable);
-            }
+            var response = isHealthy 
+                ? req.CreateResponse(HttpStatusCode.OK)
+                : req.CreateResponse(HttpStatusCode.ServiceUnavailable);
+
+            return response;
         }
     }
 }
