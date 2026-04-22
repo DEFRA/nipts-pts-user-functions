@@ -35,8 +35,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
     var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateTraveller(null));
 #pragma warning restore CS8625
 
-     Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result!.Message);
+     Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo(expectedResult));
 
       ownerServiceMoq!.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Never);
   ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Never);
@@ -51,8 +51,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
 
        var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateTraveller(requestMock));
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result!.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo(expectedResult));
 
 ownerServiceMoq!.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Never);
      ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Never);
@@ -73,8 +73,8 @@ ownerServiceMoq.Setup(a => a.DoesOwnerExists(It.IsAny<string>())).ReturnsAsync(f
 
  var result = await sut!.CreateTraveller(requestMock);
 
- Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+ Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
     ownerServiceMoq.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Once);
   ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Once);
@@ -111,8 +111,8 @@ ownerServiceMoq!.Setup(a => a.GetOwnerModel(It.IsAny<Stream>())).ReturnsAsync(ow
 
    var result = await sut!.CreateTraveller(requestMock);
 
-    Assert.IsNotNull(result);
- Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+    Assert.That(result, Is.Not.Null);
+ Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 ownerServiceMoq.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Once);
       ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Once);

@@ -43,8 +43,8 @@ private Mock<IUserService> _mockUserService = new();
       TestContext.WriteLine($"UserId tested: {userId}");
   TestContext.WriteLine($"Can parse: {Guid.TryParse(userId, out var testGuid)}");
             
-            Assert.IsNotNull(result);
-     Assert.AreEqual(HttpStatusCode.BadRequest, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+     Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
         [Test]
@@ -55,8 +55,8 @@ private Mock<IUserService> _mockUserService = new();
 
      var result = await _sut!.Run(requestMock, userId);
       
-Assert.IsNotNull(result);
-        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+Assert.That(result, Is.Not.Null);
+        Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
   }
 }

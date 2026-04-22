@@ -47,8 +47,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
      var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(null));
 #pragma warning restore CS8625
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result?.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result?.Message, Is.EqualTo(expectedResult));
 
         userServiceMock.Verify(a => a.GetUserModel(It.IsAny<Stream>()), Times.Never);
        userServiceMock.Verify(a => a.DoesUserExists(It.IsAny<string>()), Times.Never);
@@ -63,8 +63,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
     var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock));
 
-     Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result?.Message);
+     Assert.That(result, Is.Not.Null);
+            Assert.That(result?.Message, Is.EqualTo(expectedResult));
 }
 
    [Test]
@@ -81,8 +81,8 @@ var json = JsonConvert.SerializeObject("{ \"test\" : \"success\" }");
 
   var result = await sut!.CreateUser(requestMock);
 
-     Assert.IsNotNull(result);
-   Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+     Assert.That(result, Is.Not.Null);
+   Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
         [Test]
@@ -100,8 +100,8 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
       var result = await sut!.CreateUser(requestMock);
 
-            Assert.IsNotNull(result);
-      Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+      Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
   [Test]
@@ -124,8 +124,8 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
         var result = await sut!.CreateUser(requestMock);
 
-            Assert.IsNotNull(result);
-         Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+         Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
     userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
     ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -154,8 +154,8 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
             var result = await sut!.CreateUser(requestMock);
 
-  Assert.IsNotNull(result);
-       Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+  Assert.That(result, Is.Not.Null);
+       Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
     userServiceMock.Verify(a => a.UpdateUserEmail(oldEmail, newEmail), Times.Once);
   ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail), Times.Once);
@@ -181,8 +181,8 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
     var result = await sut!.CreateUser(requestMock);
 
-          Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+          Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             userServiceMock.Verify(a => a.CreateUser(userModel), Times.Once);
         }
@@ -208,8 +208,8 @@ userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync((Entity
 
    var result = await sut!.CreateUser(requestMock);
 
- Assert.IsNotNull(result);
-  Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+ Assert.That(result, Is.Not.Null);
+  Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             userServiceMock.Verify(a => a.UpdateUser(email, "signin"), Times.Once);
       userServiceMock.Verify(a => a.GetUserIdAsync(email), Times.Once);
@@ -233,8 +233,8 @@ userServiceMock.Setup(a => a.CreateUser(userModel)).ReturnsAsync(newUserId);
 
             var result = await sut!.CreateUser(requestMock);
 
-   Assert.IsNotNull(result);
-     Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+   Assert.That(result, Is.Not.Null);
+     Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
 userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never);
         userServiceMock.Verify(a => a.DoesUserExists(email), Times.Once);
@@ -258,8 +258,8 @@ userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never)
 
  var result = await sut!.CreateUser(requestMock);
 
-    Assert.IsNotNull(result);
-   Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+    Assert.That(result, Is.Not.Null);
+   Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
     userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never);
      }
@@ -286,8 +286,8 @@ userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never)
 
      var result = await sut!.CreateUser(requestMock);
 
-            Assert.IsNotNull(result);
-     Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+     Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
         [Test]
@@ -310,8 +310,8 @@ userServiceMock.Verify(a => a.GetUserByContactId(It.IsAny<Guid>()), Times.Never)
 
       var result = await sut!.CreateUser(requestMock);
 
-      Assert.IsNotNull(result);
-  Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+      Assert.That(result, Is.Not.Null);
+  Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
  [Test]
@@ -325,7 +325,7 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 #pragma warning restore CS8620 // Argument cannot be used for parameter due to differences in the nullability of reference types.
 
     var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock));
-  Assert.AreEqual("Failed to parse user model from input data", result!.Message);
+  Assert.That(result!.Message, Is.EqualTo("Failed to parse user model from input data"));
         }
 
         [Test]
@@ -340,7 +340,7 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
             userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
 
    var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.CreateUser(requestMock));
-        Assert.AreEqual("User model must have either ContactId or Email", result!.Message);
+        Assert.That(result!.Message, Is.EqualTo("User model must have either ContactId or Email"));
         }
 
   [Test]
@@ -361,8 +361,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
     var result = await sut!.CreateUser(requestMock);
 
- Assert.IsNotNull(result);
-          Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+ Assert.That(result, Is.Not.Null);
+          Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
        ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
@@ -387,8 +387,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
             var result = await sut!.CreateUser(requestMock);
 
-    Assert.IsNotNull(result);
-       Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+    Assert.That(result, Is.Not.Null);
+       Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
           userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
         }
@@ -411,8 +411,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
      var result = await sut!.CreateUser(requestMock);
 
-      Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+      Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             userServiceMock.Verify(a => a.UpdateUser(It.IsAny<string>(), "signin"), Times.Never);
@@ -432,8 +432,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
  var result = await sut!.UpdateUser(requestMock);
 
-      Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+      Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
    }
 
     [Test]
@@ -448,8 +448,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
         var result = await sut!.UpdateUser(requestMock);
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
         [Test]
@@ -458,7 +458,7 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 #pragma warning disable CS8625
   var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUser(null));
 #pragma warning restore CS8625
-            Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+            Assert.That(result!.Message, Is.EqualTo("Invalid user input, is NUll or Empty"));
   }
 
    [Test]
@@ -466,7 +466,7 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
     {
          var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
        var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUser(requestMock));
-     Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+     Assert.That(result!.Message, Is.EqualTo("Invalid user input, is NUll or Empty"));
         }
 
       [Test]
@@ -483,8 +483,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
   var result = await sut!.UpdateUserAddress(requestMock);
 
-         Assert.IsNotNull(result);
-          Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+         Assert.That(result, Is.Not.Null);
+          Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
       [Test]
@@ -499,8 +499,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
             var result = await sut!.UpdateUserAddress(requestMock);
 
-      Assert.IsNotNull(result);
-          Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+      Assert.That(result, Is.Not.Null);
+          Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
    }
 
   [Test]
@@ -509,7 +509,7 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 #pragma warning disable CS8625
          var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUserAddress(null));
 #pragma warning restore CS8625
-            Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+            Assert.That(result!.Message, Is.EqualTo("Invalid user input, is NUll or Empty"));
         }
 
         [Test]
@@ -517,7 +517,7 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
      {
       var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
      var result = Assert.ThrowsAsync<UserFunctionException>(() => sut!.UpdateUserAddress(requestMock));
-          Assert.AreEqual("Invalid user input, is NUll or Empty", result!.Message);
+          Assert.That(result!.Message, Is.EqualTo("Invalid user input, is NUll or Empty"));
    }
 
   [Test]
@@ -538,8 +538,8 @@ var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
 
    var result = await sut!.CreateUser(requestMock);
 
-          Assert.IsNotNull(result);
-          Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+          Assert.That(result, Is.Not.Null);
+          Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
    userServiceMock.Verify(a => a.UpdateUser(It.IsAny<string>(), "signin"), Times.Never);
  }
@@ -563,8 +563,8 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
             var result = await sut!.CreateUser(requestMock);
 
-            Assert.IsNotNull(result);
-        Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+        Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
    userServiceMock.Verify(a => a.UpdateUserEmail(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
             userServiceMock.Verify(a => a.UpdateUser("new@example.com", "signin"), Times.Once);
@@ -593,8 +593,8 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
     var result = await sut!.CreateUser(requestMock);
 
-   Assert.IsNotNull(result);
-      Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+   Assert.That(result, Is.Not.Null);
+      Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
 
         [Test]
@@ -616,8 +616,8 @@ var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
          var result = await sut!.CreateUser(requestMock);
 
-     Assert.IsNotNull(result);
-            Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+     Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
         }
     }
 }

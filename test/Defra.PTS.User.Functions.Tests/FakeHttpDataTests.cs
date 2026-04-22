@@ -14,11 +14,11 @@ namespace Defra.PTS.User.Functions.Tests
             var context = HttpRequestDataHelper.CreateMockFunctionContext();
             var response = new FakeHttpResponseData(context, HttpStatusCode.OK);
 
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             response.StatusCode = HttpStatusCode.BadRequest;
 
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
         [Test]
@@ -28,10 +28,10 @@ namespace Defra.PTS.User.Functions.Tests
             var request = new FakeHttpRequestData(context);
 
             var response = request.CreateResponse();
-            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
             response.StatusCode = HttpStatusCode.BadRequest;
-            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
 
         [Test]
@@ -44,7 +44,7 @@ namespace Defra.PTS.User.Functions.Tests
             await badResponse.WriteAsJsonAsync("test");
             badResponse.StatusCode = HttpStatusCode.BadRequest;
 
-            Assert.AreEqual(HttpStatusCode.BadRequest, badResponse.StatusCode);
+            Assert.That(badResponse.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
         }
     }
 }

@@ -49,8 +49,8 @@ _mockLogger = new Mock<ILogger<testFunc.Address>>();
 
             var result = await _sut!.CreateAddress(requestMock);
 
-            Assert.IsNotNull(result);
-   Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+   Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
    }
 
    [Test]
@@ -61,8 +61,8 @@ _mockLogger = new Mock<ILogger<testFunc.Address>>();
 
 var result = Assert.ThrowsAsync<AddressFunctionException>(() => _sut!.CreateAddress(requestMock));
 
-     Assert.IsNotNull(result);
-            Assert.AreEqual(expectedMessage, result!.Message);
+     Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo(expectedMessage));
    }
     }
 }
