@@ -4,9 +4,11 @@ using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Configuration;
 using Defra.PTS.User.ApiServices.Configuration;
 using Defra.PTS.User.Functions.Configuration;
+using Microsoft.Azure.Functions.Worker.Extensions.OpenApi.Extensions;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
+    .ConfigureOpenApi()
     .ConfigureAppConfiguration((context, config) =>
     {
         config

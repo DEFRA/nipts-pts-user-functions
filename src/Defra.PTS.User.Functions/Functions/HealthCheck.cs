@@ -2,7 +2,9 @@ using System.Net;
 using Defra.PTS.User.ApiServices.Interface;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 
 namespace Defra.PTS.User.Functions.Functions
 {
@@ -19,6 +21,9 @@ namespace Defra.PTS.User.Functions.Functions
         }
 
         [Function("HealthCheck")]
+        [OpenApiOperation(operationId: "HealthCheck", tags: new[] { "Health" }, Summary = "Health check endpoint", Description = "Returns the health status of the API")]
+        [OpenApiResponseWithoutBody(statusCode: HttpStatusCode.OK, Description = "The service is healthy")]
+        [OpenApiResponseWithoutBody(statusCode: HttpStatusCode.ServiceUnavailable, Description = "The service is unhealthy")]
         public async Task<HttpResponseData> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "health")] HttpRequestData req)
         {
