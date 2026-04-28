@@ -81,8 +81,8 @@ var response = req.CreateResponse(HttpStatusCode.OK);
 
             try
        {
-              await userService.UpdateUserEmail(existingUserEmail, newEmail);
-           await ownerService.UpdateOwnerEmailsByOldEmail(existingUserEmail, newEmail);
+              await userService.UpdateUserEmail(existingUserEmail!, newEmail!);
+           await ownerService.UpdateOwnerEmailsByOldEmail(existingUserEmail!, newEmail!);
       logger.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);
      }
 catch (Exception ex)
