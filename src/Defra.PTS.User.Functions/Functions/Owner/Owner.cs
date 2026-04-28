@@ -4,7 +4,6 @@ using Defra.PTS.User.Models.CustomException;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Model = Defra.PTS.User.Models;
 
@@ -13,13 +12,10 @@ namespace Defra.PTS.User.Functions.Functions.Owner
     public class Owner
     {
         private readonly IOwnerService _ownerService;
-        private readonly ILogger<Owner> _logger;
-        private const string TagName = "CreateOwner";
 
-        public Owner(IOwnerService ownerService, ILogger<Owner> logger)
+        public Owner(IOwnerService ownerService)
         {
             _ownerService = ownerService;
-            _logger = logger;
         }
 
         /// <summary>
@@ -45,14 +41,14 @@ namespace Defra.PTS.User.Functions.Functions.Owner
 
             Guid ownerId;
 
-            if (!await _ownerService.DoesOwnerExists(ownerModel.Email))
+            if (string.IsNullOrEmpty(ownerModel.Email) || !await _ownerService.DoesOwnerExists(ownerModel.Email))
             {
                 ownerId = await _ownerService.CreateOwner(ownerModel);
             }
             else
             {
                 var ownerDbEntry = await _ownerService.GetOwnerByEmail(ownerModel.Email);
-                ownerId = ownerDbEntry.Id;
+                ownerId = ownerDbEntry?.Id ?? await _ownerService.CreateOwner(ownerModel);
             }
 
             var response = req.CreateResponse(HttpStatusCode.OK);

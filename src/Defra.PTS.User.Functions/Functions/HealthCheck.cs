@@ -12,7 +12,6 @@ namespace Defra.PTS.User.Functions.Functions
     {
         private readonly IUserService _userService;
         private readonly ILogger<HealthCheck> _logger;
-        private const string TagName = "name";
 
         public HealthCheck(IUserService userService, ILogger<HealthCheck> logger)
         {

@@ -30,9 +30,9 @@ var host = new HostBuilder()
         connection = configuration.GetConnectionString("sql_db");
 #endif
 
-     services.AddDefraRepositoryServices(connection);
+     services.AddDefraRepositoryServices(connection ?? string.Empty);
         services.AddDefraApiServices();
     })
     .Build();
 
-host.Run();
+await host.RunAsync();

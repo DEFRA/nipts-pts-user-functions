@@ -14,9 +14,7 @@ namespace Defra.PTS.User.Functions.Functions.User
 {
     public class User(IUserService userService, IOwnerService ownerService, ILogger<User> logger)
     {
-        private const string CreateUserTagName = "CreateUser";
-      private const string UpdateUserTagName = "UpdateUser";
-        private const string UpdateUserAddressTagName = "UpdateUserAddress";
+        private const string InvalidUserInputMessage = "Invalid user input, is NUll or Empty";
 
       [Function("CreateUser")]
         [OpenApiOperation(operationId: "CreateUser", tags: new[] { "User" }, Summary = "Create a new user", Description = "Creates a new user in the system")]
@@ -94,14 +92,14 @@ catch (Exception ex)
         }
         }
 
-        private static bool IsEmailChanged(string existingEmail, string newEmail)
+        private static bool IsEmailChanged(string? existingEmail, string? newEmail)
         {
          return !string.IsNullOrEmpty(existingEmail) &&
      !string.IsNullOrEmpty(newEmail) &&
     !string.Equals(existingEmail, newEmail, StringComparison.OrdinalIgnoreCase);
         }
 
-   private async Task UpdateSignInTime(string email)
+   private async Task UpdateSignInTime(string? email)
         {
        if (string.IsNullOrEmpty(email))
             {
@@ -153,17 +151,17 @@ Guid userId = await userService.CreateUser(userModel);
      {
             if (req == null)
       {
-          throw new UserFunctionException("Invalid user input, is NUll or Empty");
+          throw new UserFunctionException(InvalidUserInputMessage);
             }
 
-            var inputData = req.Body ?? throw new UserFunctionException("Invalid user input, is NUll or Empty");
+            var inputData = req.Body ?? throw new UserFunctionException(InvalidUserInputMessage);
  var userEmailModel = await userService.GetUserEmailModel(inputData);
 
    var response = req.CreateResponse(HttpStatusCode.OK);
 
-            if (await userService.DoesUserExists(userEmailModel.Email))
+            if (await userService.DoesUserExists(userEmailModel.Email!))
    {
- var userId = await userService.UpdateUser(userEmailModel.Email, userEmailModel.Type);
+ var userId = await userService.UpdateUser(userEmailModel.Email!, userEmailModel.Type!);
      logger.LogInformation("User updated with ID: {0}", userId);
         await response.WriteAsJsonAsync(userId);
             }
@@ -189,17 +187,17 @@ Guid userId = await userService.CreateUser(userModel);
         {
       if (req == null)
           {
-     throw new UserFunctionException("Invalid user input, is NUll or Empty");
+     throw new UserFunctionException(InvalidUserInputMessage);
             }
 
-var inputData = req.Body ?? throw new UserFunctionException("Invalid user input, is NUll or Empty");
+var inputData = req.Body ?? throw new UserFunctionException(InvalidUserInputMessage);
      var userEmailModel = await userService.GetUserEmailModel(inputData);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
 
-            if (await userService.DoesUserExists(userEmailModel.Email))
+            if (await userService.DoesUserExists(userEmailModel.Email!))
  {
-        var userId = await userService.UpdateUser(userEmailModel.Email, userEmailModel.AddressId);
+        var userId = await userService.UpdateUser(userEmailModel.Email!, userEmailModel.AddressId);
         logger.LogInformation("User updated with ID: {0}", userId);
      await response.WriteAsJsonAsync(userId);
  }

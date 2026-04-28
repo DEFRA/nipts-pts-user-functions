@@ -4,7 +4,6 @@ using Defra.PTS.User.Models.CustomException;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using Model = Defra.PTS.User.Models;
 
@@ -13,13 +12,10 @@ namespace Defra.PTS.User.Functions.Functions.Address
     public class Address
     {
         private readonly IAddressService _addressService;
-        private readonly ILogger<Address> _logger;
-        private const string TagName = "CreateAddress";
 
-        public Address(IAddressService addressService, ILogger<Address> logger)
+        public Address(IAddressService addressService)
         {
             _addressService = addressService;
-            _logger = logger;
         }
 
         /// <summary>

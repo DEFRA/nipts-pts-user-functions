@@ -1,6 +1,5 @@
 ﻿using Model = Defra.PTS.User.Models;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using Moq;
 using testFunc = Defra.PTS.User.Functions.Functions.Owner;
 using System.Net;
@@ -15,16 +14,14 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Owner
 {
     public class OwnerTest
     {
-        private Mock<ILogger<testFunc.Owner>>? loggerMock;
      private Mock<IOwnerService>? ownerServiceMoq;
   testFunc.Owner? sut;
 
   [SetUp]
         public void SetUp()
   {
-        loggerMock = new Mock<ILogger<testFunc.Owner>>();
             ownerServiceMoq = new Mock<IOwnerService>();
-          sut = new testFunc.Owner(ownerServiceMoq.Object, loggerMock.Object);
+          sut = new testFunc.Owner(ownerServiceMoq.Object);
    }
 
    [Test]
@@ -77,7 +74,7 @@ ownerServiceMoq.Setup(a => a.DoesOwnerExists(It.IsAny<string>())).ReturnsAsync(f
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
     ownerServiceMoq.Verify(a => a.GetOwnerModel(It.IsAny<Stream>()), Times.Once);
-  ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Once);
+  ownerServiceMoq.Verify(a => a.DoesOwnerExists(It.IsAny<string>()), Times.Never);
      ownerServiceMoq.Verify(a => a.CreateOwner(It.IsAny<Model.Owner>()), Times.Once);
      }
 

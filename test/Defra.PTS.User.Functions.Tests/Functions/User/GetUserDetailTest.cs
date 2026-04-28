@@ -34,7 +34,6 @@ private Mock<IUserService> _mockUserService = new();
         public async Task GetUserDetail_InvalidUserId()
         {
      var userId = "Invalid Id";
-     var expectedValue = "You must provide a valid value for userId";
          var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
 
          var result = await _sut!.Run(requestMock, userId);

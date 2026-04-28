@@ -16,7 +16,6 @@ public class GetUserDetail
 {
     private readonly IUserService _userService;
     private readonly ILogger<GetUserDetail> _logger;
-    private const string TagName = "UserDetail";
 
     /// <summary>
   /// Get user detail
