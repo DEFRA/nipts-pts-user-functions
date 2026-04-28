@@ -3,7 +3,8 @@ using Defra.PTS.User.ApiServices.Interface;
 using Defra.PTS.User.Models.CustomException;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
+using Microsoft.OpenApi.Models;
 using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.Functions.Functions.Address
@@ -11,13 +12,10 @@ namespace Defra.PTS.User.Functions.Functions.Address
     public class Address
     {
         private readonly IAddressService _addressService;
-        private readonly ILogger<Address> _logger;
-        private const string TagName = "CreateAddress";
 
-        public Address(IAddressService addressService, ILogger<Address> logger)
+        public Address(IAddressService addressService)
         {
             _addressService = addressService;
-            _logger = logger;
         }
 
         /// <summary>
@@ -26,6 +24,9 @@ namespace Defra.PTS.User.Functions.Functions.Address
         /// <param name="req"></param>        
         /// <returns></returns>
         [Function("CreateAddress")]
+        [OpenApiOperation(operationId: "CreateAddress", tags: new[] { "Address" }, Summary = "Create a new address", Description = "Creates a new address in the system")]
+        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.Address), Required = true, Description = "Address data")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Guid), Description = "Address created successfully")]
         public async Task<HttpResponseData> CreateAddress(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createaddress")] HttpRequestData req)
         {

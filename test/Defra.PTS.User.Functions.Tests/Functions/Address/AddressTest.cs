@@ -1,7 +1,6 @@
 ﻿using Defra.PTS.User.ApiServices.Interface;
 using Defra.PTS.User.Models.CustomException;
 using Microsoft.Azure.Functions.Worker.Http;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -16,22 +15,19 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Address
     public class AddressTest
     {
         private Mock<IAddressService> _mockAddressService = new();
-        private Mock<ILogger<testFunc.Address>> _mockLogger = new();
     testFunc.Address? _sut;
 
    [SetUp]
 public void Setup()
 {
          _mockAddressService = new Mock<IAddressService>();
-_mockLogger = new Mock<ILogger<testFunc.Address>>();
- _sut = new testFunc.Address(_mockAddressService.Object, _mockLogger.Object);
+ _sut = new testFunc.Address(_mockAddressService.Object);
         }
 
 [TearDown]
   public void Teardown()
         {
  _mockAddressService.Reset();
- _mockLogger.Reset();
   }
 
   [Test]
@@ -49,8 +45,8 @@ _mockLogger = new Mock<ILogger<testFunc.Address>>();
 
             var result = await _sut!.CreateAddress(requestMock);
 
-            Assert.IsNotNull(result);
-   Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+            Assert.That(result, Is.Not.Null);
+   Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
    }
 
    [Test]
@@ -61,8 +57,8 @@ _mockLogger = new Mock<ILogger<testFunc.Address>>();
 
 var result = Assert.ThrowsAsync<AddressFunctionException>(() => _sut!.CreateAddress(requestMock));
 
-     Assert.IsNotNull(result);
-            Assert.AreEqual(expectedMessage, result!.Message);
+     Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo(expectedMessage));
    }
     }
 }

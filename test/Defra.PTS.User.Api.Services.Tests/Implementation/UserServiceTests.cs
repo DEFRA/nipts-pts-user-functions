@@ -84,7 +84,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.CreateUser(modelUser);
 
             // Assert
-            Assert.AreNotEqual(Guid.Empty, result);
+            Assert.That(result, Is.Not.EqualTo(Guid.Empty));
             _userRepository.Verify(a => a.Add(It.IsAny<Entity.User>()), Times.Once);
             _userRepository.Verify(a => a.SaveChanges(), Times.Once);
         }
@@ -117,7 +117,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             sut = new UserService(_userRepository.Object);
 
             var result = sut.UpdateUser("cuan@test.com", "signin");
-            Assert.AreEqual(userGuid, result.Result);
+            Assert.That(result.Result, Is.EqualTo(userGuid));
             _userRepository.Verify(a => a.Update(It.IsAny<Entity.User>()), Times.Once);
             _userRepository.Verify(a => a.SaveChanges(), Times.Once);
         }
@@ -150,7 +150,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             sut = new UserService(_userRepository.Object);
 
             var result = sut.UpdateUser("cuan@test.com", "signout");
-            Assert.AreEqual(userGuid, result.Result);
+            Assert.That(result.Result, Is.EqualTo(userGuid));
             _userRepository.Verify(a => a.Update(It.IsAny<Entity.User>()), Times.Once);
             _userRepository.Verify(a => a.SaveChanges(), Times.Once);
         }
@@ -162,8 +162,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var expectedResult = $"Invalid User Email Address";
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.DoesUserExists(""));
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result?.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result?.Message, Is.EqualTo(expectedResult));
         }
 
         [Test]
@@ -173,7 +173,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
 
             sut = new UserService(_userRepository.Object);
             var result = await sut.DoesUserExists("cuan@test.com");
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -202,9 +202,9 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
 
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
             var result = await sut.GetUserModel(memoryStream);
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Cuan", result.FirstName);
-            Assert.AreEqual("Brown", result.LastName);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.FirstName, Is.EqualTo("Cuan"));
+            Assert.That(result.LastName, Is.EqualTo("Brown"));
         }
 
         [Test]
@@ -215,8 +215,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(""));
 
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.GetUserModel(memoryStream));
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Cannot create User as User Model Cannot be Deserialized", result!.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo("Cannot create User as User Model Cannot be Deserialized"));
         }
 
         [Test]
@@ -231,8 +231,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
 
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
             var result = await sut.GetUserEmailModel(memoryStream);
-            Assert.IsNotNull(result);
-            Assert.AreEqual("tt@tt.com", result.Email);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Email, Is.EqualTo("tt@tt.com"));
         }
 
         [Test]
@@ -243,8 +243,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(""));
 
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.GetUserEmailModel(memoryStream));
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Cannot create User as UserEmail Model Cannot be Deserialized", result!.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo("Cannot create User as UserEmail Model Cannot be Deserialized"));
         }
 
         #endregion
@@ -273,9 +273,9 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.GetUserByContactId(contactId);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedUser.Id, result?.Id);
-            Assert.AreEqual(contactId, result?.ContactId);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result?.Id, Is.EqualTo(expectedUser.Id));
+            Assert.That(result?.ContactId, Is.EqualTo(contactId));
             _userRepository.Verify(a => a.GetUserByContactId(contactId), Times.Once);
         }
 
@@ -293,7 +293,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.GetUserByContactId(contactId);
 
             // Assert
-            Assert.IsNull(result);
+            Assert.That(result, Is.Null);
             _userRepository.Verify(a => a.GetUserByContactId(contactId), Times.Once);
         }
 
@@ -311,7 +311,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.DoesUserExistsByContactId(contactId);
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
             _userRepository.Verify(a => a.DoesUserExistsByContactId(contactId), Times.Once);
         }
 
@@ -329,7 +329,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.DoesUserExistsByContactId(contactId);
 
             // Assert
-            Assert.IsFalse(result);
+            Assert.That(result, Is.False);
             _userRepository.Verify(a => a.DoesUserExistsByContactId(contactId), Times.Once);
         }
 
@@ -357,8 +357,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             await sut.UpdateUserEmail(oldEmail, newEmail);
 
             // Assert
-            Assert.AreEqual(newEmail, user.Email);
-            Assert.AreEqual(DateTime.UtcNow.Date, user.UpdatedOn?.Date);
+            Assert.That(user.Email, Is.EqualTo(newEmail));
+            Assert.That(user.UpdatedOn?.Date, Is.EqualTo(DateTime.UtcNow.Date));
             _userRepository.Verify(a => a.GetUser(oldEmail), Times.Once);
             _userRepository.Verify(a => a.Update(user), Times.Once);
             _userRepository.Verify(a => a.SaveChanges(), Times.Once);
@@ -415,10 +415,10 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.GetOwnerEmailUpdateModel(memoryStream);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("old@example.com", result.OldEmail);
-            Assert.AreEqual("new@example.com", result.NewEmail);
-            Assert.AreEqual(Guid.Parse("12345678-1234-1234-1234-123456789012"), result.UserId);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.OldEmail, Is.EqualTo("old@example.com"));
+            Assert.That(result.NewEmail, Is.EqualTo("new@example.com"));
+            Assert.That(result.UserId, Is.EqualTo(Guid.Parse("12345678-1234-1234-1234-123456789012")));
         }
 
         [Test]
@@ -431,8 +431,8 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
 
             // Act & Assert
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.GetOwnerEmailUpdateModel(memoryStream));
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Cannot deserialize OwnerEmailUpdateModel", result!.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo("Cannot deserialize OwnerEmailUpdateModel"));
         }
 
         [Test]
@@ -452,7 +452,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.GetUserIdAsync(email);
 
             // Assert
-            Assert.AreEqual(userId, result);
+            Assert.That(result, Is.EqualTo(userId));
             _userRepository.Verify(a => a.GetUser(email), Times.Once);
         }
 
@@ -469,7 +469,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.PerformHealthCheckLogic();
 
             // Assert
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
             _userRepository.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
         }
 
@@ -493,9 +493,9 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             var result = await sut.GetUserDetail(contactId);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedUserDetail.FullName, result.FullName);
-            Assert.AreEqual(expectedUserDetail.Email, result.Email);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.FullName, Is.EqualTo(expectedUserDetail.FullName));
+            Assert.That(result.Email, Is.EqualTo(expectedUserDetail.Email));
             _userRepository.Verify(a => a.GetUserDetail(contactId), Times.Once);
         }
 

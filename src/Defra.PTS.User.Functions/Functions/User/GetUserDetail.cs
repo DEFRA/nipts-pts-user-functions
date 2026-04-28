@@ -3,7 +3,9 @@ using Defra.PTS.User.ApiServices.Interface;
 using Defra.PTS.User.Entities;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 
 namespace Defra.PTS.User.Functions.Functions.User;
 
@@ -14,7 +16,6 @@ public class GetUserDetail
 {
     private readonly IUserService _userService;
     private readonly ILogger<GetUserDetail> _logger;
-    private const string TagName = "UserDetail";
 
     /// <summary>
   /// Get user detail
@@ -28,6 +29,10 @@ public class GetUserDetail
     }
 
     [Function(nameof(GetUserDetail))]
+    [OpenApiOperation(operationId: "GetUserDetail", tags: new[] { "User" }, Summary = "Get user details", Description = "Retrieves detailed information about a user by their ID")]
+    [OpenApiParameter(name: "userId", In = ParameterLocation.Path, Required = true, Type = typeof(string), Description = "The user ID (GUID)")]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(UserDetail), Description = "User details retrieved successfully")]
+    [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "text/plain", bodyType: typeof(string), Description = "Invalid user ID format")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "GetUserDetail/{userId}")] HttpRequestData req, string userId)
   {

@@ -31,8 +31,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
         
  var result = await sut!.Run(requestMoq);
         
-  Assert.IsNotNull(result);
-      Assert.AreEqual(HttpStatusCode.OK, result.StatusCode);
+  Assert.That(result, Is.Not.Null);
+      Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
     userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
     }
 
@@ -44,8 +44,8 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
         
       var result = await sut!.Run(requestMoq);
          
-      Assert.IsNotNull(result);
-    Assert.AreEqual(HttpStatusCode.ServiceUnavailable, result.StatusCode);
+      Assert.That(result, Is.Not.Null);
+    Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
             userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
         }
     }

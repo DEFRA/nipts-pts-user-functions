@@ -83,7 +83,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             var result = await sut.CreateOwner(modelOwner);
 
             // Assert
-            Assert.AreNotEqual(Guid.Empty, result);
+            Assert.That(result, Is.Not.EqualTo(Guid.Empty));
             _repoAddressService.Verify(a => a.Add(It.IsAny<Entity.Address>()), Times.Once);
             _repoAddressService.Verify(a => a.SaveChanges(), Times.Once);
             _ownerRepository.Verify(a => a.Add(It.IsAny<Entity.Owner>()), Times.Once);
@@ -97,8 +97,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             var expectedResult = $"Invalid Owner Email Address";
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.DoesOwnerExists(""));
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual(expectedResult, result?.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result?.Message, Is.EqualTo(expectedResult));
         }
 
         [Test]
@@ -108,7 +108,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
 
             sut = new OwnerService(_ownerRepository.Object, _repoAddressService.Object);
             var result = await sut.DoesOwnerExists("cuan@test.com");
-            Assert.IsTrue(result);
+            Assert.That(result, Is.True);
         }
 
         [Test]
@@ -129,8 +129,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
 
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(json));
             var result = await sut.GetOwnerModel(memoryStream);
-            Assert.IsNotNull(result);
-            Assert.AreEqual("cuan@test.com", result.Email);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.Email, Is.EqualTo("cuan@test.com"));
         }
 
         [Test]
@@ -152,8 +152,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             sut = new OwnerService(_ownerRepository.Object, _repoAddressService.Object);
 
             var result = await sut.GetOwnerByEmail("cuan@test.com");
-            Assert.IsNotNull(result);
-            Assert.AreEqual("cuan@test.com", result!.Email);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Email, Is.EqualTo("cuan@test.com"));
         }
 
         [Test]
@@ -162,8 +162,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             sut = new OwnerService(_ownerRepository.Object, _repoAddressService.Object);
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.GetOwnerByEmail(""));
 
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Invalid Owner Email Address", result!.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.Message, Is.EqualTo("Invalid Owner Email Address"));
         }
 
         [Test]
@@ -174,8 +174,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(""));
 
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.GetOwnerModel(memoryStream));
-            Assert.IsNotNull(result);
-            Assert.AreEqual("Cannot create Owner as Owner Model Cannot be Deserialized", result?.Message);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result?.Message, Is.EqualTo("Cannot create Owner as Owner Model Cannot be Deserialized"));
         }
 
         #endregion
@@ -205,10 +205,10 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             await sut.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail);
 
             // Assert
-            Assert.AreEqual(newEmail, owners[0].Email);
-            Assert.AreEqual(newEmail, owners[1].Email);
-            Assert.AreEqual(DateTime.UtcNow.Date, owners[0].UpdatedOn?.Date);
-            Assert.AreEqual(DateTime.UtcNow.Date, owners[1].UpdatedOn?.Date);
+            Assert.That(owners[0].Email, Is.EqualTo(newEmail));
+            Assert.That(owners[1].Email, Is.EqualTo(newEmail));
+            Assert.That(owners[0].UpdatedOn?.Date, Is.EqualTo(DateTime.UtcNow.Date));
+            Assert.That(owners[1].UpdatedOn?.Date, Is.EqualTo(DateTime.UtcNow.Date));
 
             _ownerRepository.Verify(a => a.GetOwnersByEmailAsync(oldEmail), Times.Once);
             _ownerRepository.Verify(a => a.Update(It.IsAny<Entity.Owner>()), Times.Exactly(2));
@@ -300,8 +300,8 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             await sut.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail);
 
             // Assert
-            Assert.AreEqual(newEmail, owner.Email);
-            Assert.AreEqual(DateTime.UtcNow.Date, owner.UpdatedOn?.Date);
+            Assert.That(owner.Email, Is.EqualTo(newEmail));
+            Assert.That(owner.UpdatedOn?.Date, Is.EqualTo(DateTime.UtcNow.Date));
             _ownerRepository.Verify(a => a.Update(owner), Times.Once);
             _ownerRepository.Verify(a => a.SaveChanges(), Times.Once);
         }
@@ -354,7 +354,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
 
             // Act & Assert
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.DoesOwnerExists(null!));
-            Assert.AreEqual("Invalid Owner Email Address", result!.Message);
+            Assert.That(result!.Message, Is.EqualTo("Invalid Owner Email Address"));
         }
 
         [Test]
@@ -365,7 +365,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
 
             // Act & Assert
             var result = Assert.ThrowsAsync<UserFunctionException>(() => sut.GetOwnerByEmail(null!));
-            Assert.AreEqual("Invalid Owner Email Address", result!.Message);
+            Assert.That(result!.Message, Is.EqualTo("Invalid Owner Email Address"));
         }
 
         [Test]
@@ -391,10 +391,10 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             var result = await sut.GetOwnerModel(memoryStream);
 
             // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual("John Doe", result.FullName);
-            Assert.AreEqual("john.doe@example.com", result.Email);
-            Assert.AreEqual("1234567890", result.Telephone);
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.FullName, Is.EqualTo("John Doe"));
+            Assert.That(result.Email, Is.EqualTo("john.doe@example.com"));
+            Assert.That(result.Telephone, Is.EqualTo("1234567890"));
         }
 
         #endregion
