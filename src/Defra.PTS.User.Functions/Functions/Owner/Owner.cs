@@ -1,19 +1,10 @@
-using System;
-using System.IO;
 using System.Net;
-using System.Threading.Tasks;
-using Defra.PTS.User.ApiServices.Implementation;
 using Defra.PTS.User.ApiServices.Interface;
 using Defra.PTS.User.Models.CustomException;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Enums;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using Model = Defra.PTS.User.Models;
 
 namespace Defra.PTS.User.Functions.Functions.Owner
@@ -21,7 +12,6 @@ namespace Defra.PTS.User.Functions.Functions.Owner
     public class Owner
     {
         private readonly IOwnerService _ownerService;
-        private const string TagName = "CreateOwner";
 
         public Owner(IOwnerService ownerService)
         {
@@ -32,34 +22,38 @@ namespace Defra.PTS.User.Functions.Functions.Owner
         /// Create Traveller
         /// </summary>
         /// <param name="req"></param>
-        /// <param name="log"></param>
         /// <returns></returns>
-        [FunctionName("CreateOwner")]
-        [OpenApiOperation(operationId: "CreateOwner", tags: TagName )]
-        [OpenApiSecurity("function_key", SecuritySchemeType.ApiKey, Name = "code", In = OpenApiSecurityLocationType.Query)]
-        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.Owner), Description = "Create Traveller")]
-        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(string), Description = "The OK response")]
-        public async Task<IActionResult> CreateTraveller(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createowner")] HttpRequest req,
-            ILogger log)
+        [Function("CreateOwner")]
+        [OpenApiOperation(operationId: "CreateOwner", tags: new[] { "Owner" }, Summary = "Create a new owner", Description = "Creates a new owner/traveller in the system")]
+        [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.Owner), Required = true, Description = "Owner data")]
+        [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Guid), Description = "Owner created successfully")]
+        public async Task<HttpResponseData> CreateTraveller(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createowner")] HttpRequestData? req)
         {
-            var inputData = req?.Body;
-            if (inputData == null)
+            if (req == null)
             {
                 throw new UserFunctionException("Invalid Owner input, is NUll or Empty");
             }
 
+            var inputData = req.Body ?? throw new UserFunctionException("Invalid Owner input, is NUll or Empty");
+
             var ownerModel = await _ownerService.GetOwnerModel(inputData);
 
-            if (!await _ownerService.DoesOwnerExists(ownerModel.Email))
+            Guid ownerId;
+
+            if (string.IsNullOrEmpty(ownerModel.Email) || !await _ownerService.DoesOwnerExists(ownerModel.Email))
             {
-                Guid travellerId = await _ownerService.CreateOwner(ownerModel);
-                return new OkObjectResult(travellerId);
+                ownerId = await _ownerService.CreateOwner(ownerModel);
+            }
+            else
+            {
+                var ownerDbEntry = await _ownerService.GetOwnerByEmail(ownerModel.Email);
+                ownerId = ownerDbEntry?.Id ?? await _ownerService.CreateOwner(ownerModel);
             }
 
-            var ownerDbEntry = await _ownerService.GetOwnerByEmail(ownerModel.Email);
-
-            return new OkObjectResult(ownerDbEntry.Id);          
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            await response.WriteAsJsonAsync(ownerId);
+            return response;
         }
     }
 }
