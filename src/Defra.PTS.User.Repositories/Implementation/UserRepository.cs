@@ -31,7 +31,7 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public async Task<Entity.User?> GetUser(string userEmailAddress)
         {
-                return await UserContext?.User?.SingleOrDefaultAsync(a => a.Email == userEmailAddress)!;
+            return await UserContext?.User?.SingleOrDefaultAsync(a => a.Email == userEmailAddress)!;
         }
 
         [ExcludeFromCodeCoverage]
@@ -44,10 +44,10 @@ namespace Defra.PTS.User.Repositories.Implementation
 
                 // Check if the connection is open
                 bool isOpen = UserContext.Database.GetDbConnection().State == ConnectionState.Open;
-                
+
                 // Close the connection to prevent connection leaks
                 await UserContext.Database.CloseConnectionAsync();
-                
+
                 return isOpen;
             }
             catch

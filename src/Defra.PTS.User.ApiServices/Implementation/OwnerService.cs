@@ -20,7 +20,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
     public class OwnerService(
         IOwnerRepository ownerRepository,
         IRepository<Entity.Address> addressRepository) : IOwnerService
-    {        
+    {
         private readonly IOwnerRepository _ownerRepository = ownerRepository;
         private readonly IRepository<Entity.Address> _addressRepository = addressRepository;
 
@@ -30,7 +30,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
         };
 
         public async Task<Guid> CreateOwner(Model.Owner ownerModel)
-        {            
+        {
             var addressDB = new Entity.Address()
             {
                 AddressLineOne = ownerModel?.Address?.AddressLineOne,
@@ -50,15 +50,15 @@ namespace Defra.PTS.User.ApiServices.Implementation
 
             var ownerDB = new Entity.Owner()
             {
-                 Email = ownerModel?.Email,
-                 FullName = ownerModel?.FullName,
-                 Telephone = ownerModel?.Telephone,
-                 AddressId = addressDB.Id,                 
-                 CreatedBy = ownerModel?.CreatedBy,
-                 CreatedOn = DateTime.Now
+                Email = ownerModel?.Email,
+                FullName = ownerModel?.FullName,
+                Telephone = ownerModel?.Telephone,
+                AddressId = addressDB.Id,
+                CreatedBy = ownerModel?.CreatedBy,
+                CreatedOn = DateTime.Now
             };
             await _ownerRepository.Add(ownerDB);
-            await _ownerRepository.SaveChanges();           
+            await _ownerRepository.SaveChanges();
 
             return ownerDB.Id;
         }

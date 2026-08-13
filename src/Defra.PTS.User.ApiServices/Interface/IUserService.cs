@@ -23,4 +23,4 @@ namespace Defra.PTS.User.ApiServices.Interface
         Task UpdateUserEmail(string oldEmail, string newEmail);
         Task<Model.OwnerEmailUpdateModel> GetOwnerEmailUpdateModel(Stream inputStream);
     }
-}   
+}

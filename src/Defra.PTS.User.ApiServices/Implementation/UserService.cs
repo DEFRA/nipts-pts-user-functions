@@ -8,9 +8,9 @@ using Defra.PTS.User.Entities;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Defra.PTS.User.ApiServices.Implementation
-{    
+{
     public class UserService(IUserRepository userRepository) : IUserService
-    {        
+    {
         private readonly IUserRepository _userRepository = userRepository;
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -108,13 +108,13 @@ namespace Defra.PTS.User.ApiServices.Implementation
             {
                 string userEmail = await new StreamReader(userStream).ReadToEndAsync();
                 Model.UserEmail? userEmailModel = JsonSerializer.Deserialize<Model.UserEmail>(userEmail, _jsonOptions);
-   
+
                 return userEmailModel!;
             }
             catch
             {
                 throw new UserFunctionException("Cannot create User as UserEmail Model Cannot be Deserialized");
-            }        
+            }
         }
 
         [ExcludeFromCodeCoverage]

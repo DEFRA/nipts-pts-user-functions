@@ -32,7 +32,7 @@ namespace Defra.PTS.User.Functions.Tests.Helpers
                         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
                     });
                 });
-            
+
             var serviceProvider = services.BuildServiceProvider();
 
             // Use Mock<FunctionContext> to avoid needing to implement all abstract members
@@ -42,8 +42,8 @@ namespace Defra.PTS.User.Functions.Tests.Helpers
             mockContext.Setup(c => c.FunctionId).Returns(Guid.NewGuid().ToString());
             mockContext.Setup(c => c.Features).Returns(Mock.Of<IInvocationFeatures>());
             mockContext.Setup(c => c.Items).Returns(new Dictionary<object, object>());
-        
-             return mockContext.Object;
-         }
+
+            return mockContext.Object;
+        }
     }
 }
