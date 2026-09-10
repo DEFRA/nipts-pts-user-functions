@@ -16,166 +16,166 @@ namespace Defra.PTS.User.Functions.Functions.User
     {
         private const string InvalidUserInputMessage = "Invalid user input, is NUll or Empty";
 
-      [Function("CreateUser")]
+        [Function("CreateUser")]
         [OpenApiOperation(operationId: "CreateUser", tags: new[] { "User" }, Summary = "Create a new user", Description = "Creates a new user in the system")]
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.User), Required = true, Description = "User data")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Guid), Description = "User created successfully")]
         public async Task<HttpResponseData> CreateUser(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createuser")] HttpRequestData? req)
+              [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "createuser")] HttpRequestData? req)
         {
-    if (req == null)
-   {
-      throw new UserFunctionException("Invalid user input, is NULL or Empty");
+            if (req == null)
+            {
+                throw new UserFunctionException("Invalid user input, is NULL or Empty");
             }
 
-       var inputData = req.Body ?? throw new UserFunctionException("Invalid user input, is NULL or Empty");
-var userModel = await userService.GetUserModel(inputData) ?? throw new UserFunctionException("Failed to parse user model from input data");
+            var inputData = req.Body ?? throw new UserFunctionException("Invalid user input, is NULL or Empty");
+            var userModel = await userService.GetUserModel(inputData) ?? throw new UserFunctionException("Failed to parse user model from input data");
 
-        Guid userId;
+            Guid userId;
 
-if (HasValidContactId(userModel))
-  {
+            if (HasValidContactId(userModel))
+            {
                 userId = await HandleContactIdBasedUser(userModel);
             }
-else
-       {
-     userId = await HandleEmailBasedUser(userModel);
-        }
+            else
+            {
+                userId = await HandleEmailBasedUser(userModel);
+            }
 
-var response = req.CreateResponse(HttpStatusCode.OK);
-    await response.WriteAsJsonAsync(userId);
+            var response = req.CreateResponse(HttpStatusCode.OK);
+            await response.WriteAsJsonAsync(userId);
             return response;
         }
 
         private static bool HasValidContactId(Model.User userModel)
         {
-          return userModel.ContactId.HasValue && userModel.ContactId.Value != Guid.Empty;
+            return userModel.ContactId.HasValue && userModel.ContactId.Value != Guid.Empty;
         }
 
         private async Task<Guid> HandleContactIdBasedUser(Model.User userModel)
         {
-        var existingUser = await userService.GetUserByContactId(userModel.ContactId!.Value);
+            var existingUser = await userService.GetUserByContactId(userModel.ContactId!.Value);
 
-  if (existingUser == null)
+            if (existingUser == null)
             {
-           return await HandleEmailBasedUser(userModel);
-    }
+                return await HandleEmailBasedUser(userModel);
+            }
 
-        await ProcessEmailUpdate(existingUser, userModel);
-    await UpdateSignInTime(userModel.Email);
+            await ProcessEmailUpdate(existingUser, userModel);
+            await UpdateSignInTime(userModel.Email);
 
- return existingUser.Id;
+            return existingUser.Id;
         }
 
-    private async Task ProcessEmailUpdate(Entity.User existingUser, Model.User userModel)
-    {
-         var existingUserEmail = existingUser.Email;
+        private async Task ProcessEmailUpdate(Entity.User existingUser, Model.User userModel)
+        {
+            var existingUserEmail = existingUser.Email;
             var newEmail = userModel.Email;
-   if (!IsEmailChanged(existingUserEmail, newEmail))
+            if (!IsEmailChanged(existingUserEmail, newEmail))
             {
-    return;
-        }
+                return;
+            }
 
-   logger.LogInformation("Email changed for ContactId {ContactId} from {OldEmail} to {NewEmail}",
-            userModel.ContactId, existingUserEmail, newEmail);
+            logger.LogInformation("Email changed for ContactId {ContactId} from {OldEmail} to {NewEmail}",
+                     userModel.ContactId, existingUserEmail, newEmail);
 
             try
-       {
-              await userService.UpdateUserEmail(existingUserEmail!, newEmail!);
-           await ownerService.UpdateOwnerEmailsByOldEmail(existingUserEmail!, newEmail!);
-      logger.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);
-     }
-catch (Exception ex)
             {
-          logger.LogError(ex, "Failed to update emails for ContactId {ContactId}: {ErrorMessage}",
-        userModel.ContactId, ex.Message);
-        }
+                await userService.UpdateUserEmail(existingUserEmail!, newEmail!);
+                await ownerService.UpdateOwnerEmailsByOldEmail(existingUserEmail!, newEmail!);
+                logger.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to update emails for ContactId {ContactId}: {ErrorMessage}",
+              userModel.ContactId, ex.Message);
+            }
         }
 
         private static bool IsEmailChanged(string? existingEmail, string? newEmail)
         {
-         return !string.IsNullOrEmpty(existingEmail) &&
-     !string.IsNullOrEmpty(newEmail) &&
-    !string.Equals(existingEmail, newEmail, StringComparison.OrdinalIgnoreCase);
+            return !string.IsNullOrEmpty(existingEmail) &&
+        !string.IsNullOrEmpty(newEmail) &&
+       !string.Equals(existingEmail, newEmail, StringComparison.OrdinalIgnoreCase);
         }
 
-   private async Task UpdateSignInTime(string? email)
+        private async Task UpdateSignInTime(string? email)
         {
-       if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(email))
             {
-           return;
-        }
+                return;
+            }
 
             try
             {
-    await userService.UpdateUser(email, "signin");
-    }
-     catch (Exception ex)
-       {
-        logger.LogWarning(ex, "Failed to update sign-in time for user {Email}", email);
-    }
+                await userService.UpdateUser(email, "signin");
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to update sign-in time for user {Email}", email);
+            }
         }
 
         private async Task<Guid> HandleEmailBasedUser(Model.User userModel)
         {
             if (string.IsNullOrEmpty(userModel.Email))
-  {
-            throw new UserFunctionException("User model must have either ContactId or Email");
+            {
+                throw new UserFunctionException("User model must have either ContactId or Email");
             }
 
             bool userExists = await userService.DoesUserExists(userModel.Email);
 
-          if (!userExists)
+            if (!userExists)
             {
-      logger.LogInformation("Creating new user for email {Email}", userModel.Email);
-Guid userId = await userService.CreateUser(userModel);
-      return userId;
-    }
+                logger.LogInformation("Creating new user for email {Email}", userModel.Email);
+                Guid userId = await userService.CreateUser(userModel);
+                return userId;
+            }
 
-        await UpdateSignInTime(userModel.Email);
+            await UpdateSignInTime(userModel.Email);
             var existingUserId = await userService.GetUserIdAsync(userModel.Email);
             return existingUserId;
         }
 
-     /// <summary>
-      /// Update User
+        /// <summary>
+        /// Update User
         /// </summary>
-  /// <param name="req"></param>
+        /// <param name="req"></param>
         /// <returns></returns>
-   [Function("UpdateUser")]
+        [Function("UpdateUser")]
         [OpenApiOperation(operationId: "UpdateUser", tags: new[] { "User" }, Summary = "Update user details", Description = "Updates an existing user's information")]
         [OpenApiRequestBody(contentType: "application/json", bodyType: typeof(Model.UserEmail), Required = true, Description = "User email and type")]
         [OpenApiResponseWithBody(statusCode: HttpStatusCode.OK, contentType: "application/json", bodyType: typeof(Guid), Description = "User updated successfully")]
         public async Task<HttpResponseData> UpdateUser(
-     [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuser")] HttpRequestData? req)
-     {
+          [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuser")] HttpRequestData? req)
+        {
             if (req == null)
-      {
-          throw new UserFunctionException(InvalidUserInputMessage);
+            {
+                throw new UserFunctionException(InvalidUserInputMessage);
             }
 
             var inputData = req.Body ?? throw new UserFunctionException(InvalidUserInputMessage);
- var userEmailModel = await userService.GetUserEmailModel(inputData);
+            var userEmailModel = await userService.GetUserEmailModel(inputData);
 
-   var response = req.CreateResponse(HttpStatusCode.OK);
+            var response = req.CreateResponse(HttpStatusCode.OK);
 
             if (await userService.DoesUserExists(userEmailModel.Email!))
-   {
- var userId = await userService.UpdateUser(userEmailModel.Email!, userEmailModel.Type!);
-     logger.LogInformation("User updated with ID: {0}", userId);
-        await response.WriteAsJsonAsync(userId);
+            {
+                var userId = await userService.UpdateUser(userEmailModel.Email!, userEmailModel.Type!);
+                logger.LogInformation("User updated with ID: {0}", userId);
+                await response.WriteAsJsonAsync(userId);
             }
             else
-        {
-      await response.WriteAsJsonAsync("Cannot update new User as user does not exists");
+            {
+                await response.WriteAsJsonAsync("Cannot update new User as user does not exists");
             }
 
-     return response;
+            return response;
         }
 
-      /// <summary>
-     /// Update User Address
-     /// </summary>
+        /// <summary>
+        /// Update User Address
+        /// </summary>
         /// <param name="req"></param>
         /// <returns></returns>
         [Function("UpdateUserAddress")]
@@ -185,29 +185,29 @@ Guid userId = await userService.CreateUser(userModel);
         public async Task<HttpResponseData> UpdateUserAddress(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "updateuseraddress")] HttpRequestData? req)
         {
-      if (req == null)
-          {
-     throw new UserFunctionException(InvalidUserInputMessage);
+            if (req == null)
+            {
+                throw new UserFunctionException(InvalidUserInputMessage);
             }
 
-var inputData = req.Body ?? throw new UserFunctionException(InvalidUserInputMessage);
-     var userEmailModel = await userService.GetUserEmailModel(inputData);
+            var inputData = req.Body ?? throw new UserFunctionException(InvalidUserInputMessage);
+            var userEmailModel = await userService.GetUserEmailModel(inputData);
 
             var response = req.CreateResponse(HttpStatusCode.OK);
 
             if (await userService.DoesUserExists(userEmailModel.Email!))
- {
-        var userId = await userService.UpdateUser(userEmailModel.Email!, userEmailModel.AddressId);
-        logger.LogInformation("User updated with ID: {0}", userId);
-     await response.WriteAsJsonAsync(userId);
- }
+            {
+                var userId = await userService.UpdateUser(userEmailModel.Email!, userEmailModel.AddressId);
+                logger.LogInformation("User updated with ID: {0}", userId);
+                await response.WriteAsJsonAsync(userId);
+            }
             else
             {
-      await response.WriteAsJsonAsync("Cannot update new User as user does not exists");
+                await response.WriteAsJsonAsync("Cannot update new User as user does not exists");
             }
 
-      return response;
-  }
+            return response;
+        }
     }
 }
 

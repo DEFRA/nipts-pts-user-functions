@@ -15,50 +15,50 @@ namespace Defra.PTS.User.Functions.Tests.Functions.Address
     public class AddressTest
     {
         private Mock<IAddressService> _mockAddressService = new();
-    testFunc.Address? _sut;
+        testFunc.Address? _sut;
 
-   [SetUp]
-public void Setup()
-{
-         _mockAddressService = new Mock<IAddressService>();
- _sut = new testFunc.Address(_mockAddressService.Object);
+        [SetUp]
+        public void Setup()
+        {
+            _mockAddressService = new Mock<IAddressService>();
+            _sut = new testFunc.Address(_mockAddressService.Object);
         }
 
-[TearDown]
-  public void Teardown()
+        [TearDown]
+        public void Teardown()
         {
- _mockAddressService.Reset();
-  }
+            _mockAddressService.Reset();
+        }
 
-  [Test]
-  public async Task CreateAddress()
-  {
-       var json = JsonConvert.SerializeObject(null);
-  var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
-    var addressId = Guid.NewGuid();
- var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
+        [Test]
+        public async Task CreateAddress()
+        {
+            var json = JsonConvert.SerializeObject(null);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            var addressId = Guid.NewGuid();
+            var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
 
-        _mockAddressService.Setup(x => x.GetAddressModel(It.IsAny<Stream>()))
-          .ReturnsAsync(new Models.Address());
-      _mockAddressService.Setup(x => x.CreateAddress(It.IsAny<Models.Address>()))
-     .ReturnsAsync(addressId);
+            _mockAddressService.Setup(x => x.GetAddressModel(It.IsAny<Stream>()))
+              .ReturnsAsync(new Models.Address());
+            _mockAddressService.Setup(x => x.CreateAddress(It.IsAny<Models.Address>()))
+           .ReturnsAsync(addressId);
 
             var result = await _sut!.CreateAddress(requestMock);
 
             Assert.That(result, Is.Not.Null);
-   Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-   }
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+        }
 
-   [Test]
-   public void CreateAddress_Throw_Exception()
-   {
-      var expectedMessage = "Invalid Address input, is NUll or Empty";
+        [Test]
+        public void CreateAddress_Throw_Exception()
+        {
+            var expectedMessage = "Invalid Address input, is NUll or Empty";
             var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData();
 
-var result = Assert.ThrowsAsync<AddressFunctionException>(() => _sut!.CreateAddress(requestMock));
+            var result = Assert.ThrowsAsync<AddressFunctionException>(() => _sut!.CreateAddress(requestMock));
 
-     Assert.That(result, Is.Not.Null);
+            Assert.That(result, Is.Not.Null);
             Assert.That(result!.Message, Is.EqualTo(expectedMessage));
-   }
+        }
     }
 }

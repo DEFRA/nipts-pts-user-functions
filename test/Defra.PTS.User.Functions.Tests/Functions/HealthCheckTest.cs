@@ -12,40 +12,40 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
     public class HealthCheckTest
     {
         private Mock<IUserService>? userServiceMoq;
-     private Mock<ILogger<testFunc.HealthCheck>>? loggerMock;
+        private Mock<ILogger<testFunc.HealthCheck>>? loggerMock;
         testFunc.HealthCheck? sut;
 
-        [SetUp] 
+        [SetUp]
         public void SetUp()
         {
-   loggerMock = new Mock<ILogger<testFunc.HealthCheck>>();
+            loggerMock = new Mock<ILogger<testFunc.HealthCheck>>();
             userServiceMoq = new Mock<IUserService>();
-      sut = new testFunc.HealthCheck(userServiceMoq.Object, loggerMock.Object);
- }
+            sut = new testFunc.HealthCheck(userServiceMoq.Object, loggerMock.Object);
+        }
 
         [Test]
-     public async Task HealthCheck_WhenTrue_Then_ReturnsServiceAvailable()
+        public async Task HealthCheck_WhenTrue_Then_ReturnsServiceAvailable()
         {
             var requestMoq = HttpRequestDataHelper.CreateMockHttpRequestData();
-   userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(true));
-        
- var result = await sut!.Run(requestMoq);
-        
-  Assert.That(result, Is.Not.Null);
-      Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-    userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
-    }
+            userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(true));
 
-  [Test]
+            var result = await sut!.Run(requestMoq);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
+        }
+
+        [Test]
         public async Task HealthCheck_WhenFalse_Then_ReturnsServiceUnavailable()
         {
-       var requestMoq = HttpRequestDataHelper.CreateMockHttpRequestData();
-       userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(false));
-        
-      var result = await sut!.Run(requestMoq);
-         
-      Assert.That(result, Is.Not.Null);
-    Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
+            var requestMoq = HttpRequestDataHelper.CreateMockHttpRequestData();
+            userServiceMoq!.Setup(a => a.PerformHealthCheckLogic()).Returns(Task.FromResult(false));
+
+            var result = await sut!.Run(requestMoq);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.ServiceUnavailable));
             userServiceMoq.Verify(a => a.PerformHealthCheckLogic(), Times.Once);
         }
     }
