@@ -18,14 +18,14 @@ public class GetUserDetail
     private readonly ILogger<GetUserDetail> _logger;
 
     /// <summary>
-  /// Get user detail
+    /// Get user detail
     /// </summary>
     /// <param name="userService">The user service</param>
     /// <param name="log">The log</param>
     public GetUserDetail(IUserService userService, ILogger<GetUserDetail> log)
     {
-   _userService = userService;
-  _logger = log;
+        _userService = userService;
+        _logger = log;
     }
 
     [Function(nameof(GetUserDetail))]
@@ -35,21 +35,21 @@ public class GetUserDetail
     [OpenApiResponseWithBody(statusCode: HttpStatusCode.BadRequest, contentType: "text/plain", bodyType: typeof(string), Description = "Invalid user ID format")]
     public async Task<HttpResponseData> Run(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "GetUserDetail/{userId}")] HttpRequestData req, string userId)
-  {
+    {
         _logger.LogInformation($"{nameof(GetUserDetail)} HTTP trigger function processed a request.");
 
-     if (!Guid.TryParse(userId, out Guid userGuid))
-   {
+        if (!Guid.TryParse(userId, out Guid userGuid))
+        {
             var badResponse = req.CreateResponse();
-    badResponse.StatusCode = HttpStatusCode.BadRequest;
+            badResponse.StatusCode = HttpStatusCode.BadRequest;
             await badResponse.WriteStringAsync("You must provide a valid value for userId");
-     return badResponse;
+            return badResponse;
         }
 
         var result = await _userService.GetUserDetail(userGuid);
 
-     var response = req.CreateResponse();
-   response.StatusCode = HttpStatusCode.OK;
+        var response = req.CreateResponse();
+        response.StatusCode = HttpStatusCode.OK;
         await response.WriteAsJsonAsync(result);
         return response;
     }

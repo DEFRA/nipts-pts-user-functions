@@ -18,19 +18,19 @@ var host = new HostBuilder()
     })
     .ConfigureServices((context, services) =>
     {
-     services.AddApplicationInsightsTelemetryWorkerService();
+        services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
 
         var configuration = context.Configuration;
         var connection = string.Empty;
 
 #if DEBUG
-     connection = configuration["sql_db"];
+        connection = configuration["sql_db"];
 #else
         connection = configuration.GetConnectionString("sql_db");
 #endif
 
-     services.AddDefraRepositoryServices(connection ?? string.Empty);
+        services.AddDefraRepositoryServices(connection ?? string.Empty);
         services.AddDefraApiServices();
     })
     .Build();

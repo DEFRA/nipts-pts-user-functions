@@ -13,7 +13,7 @@ namespace Defra.PTS.User.Functions.Tests.Helpers
     {
         private HttpStatusCode _statusCode;
 
-        public FakeHttpResponseData(FunctionContext functionContext, HttpStatusCode statusCode = HttpStatusCode.OK) 
+        public FakeHttpResponseData(FunctionContext functionContext, HttpStatusCode statusCode = HttpStatusCode.OK)
             : base(functionContext)
         {
             _statusCode = statusCode;
@@ -21,10 +21,10 @@ namespace Defra.PTS.User.Functions.Tests.Helpers
             Body = new MemoryStream();
         }
 
-        public override HttpStatusCode StatusCode 
-        { 
-            get => _statusCode; 
-            set => _statusCode = value; 
+        public override HttpStatusCode StatusCode
+        {
+            get => _statusCode;
+            set => _statusCode = value;
         }
         public override HttpHeadersCollection Headers { get; set; }
         public override Stream Body { get; set; }

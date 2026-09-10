@@ -41,7 +41,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
         public async Task CreateOwner_WhenValidData_ReturnsGuid()
         {
             // Arrange
-            Guid addressGuid = Guid.NewGuid(); 
+            Guid addressGuid = Guid.NewGuid();
             var modelAddress = new Model.Address()
             {
                 AddressLineOne = "19 First Avenue",
@@ -68,12 +68,12 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
             };
 
             _repoAddressService.Setup(a => a.Add(It.IsAny<Entity.Address>()))
-                .Callback<Entity.Address>(addr => addr.Id = addressGuid) 
+                .Callback<Entity.Address>(addr => addr.Id = addressGuid)
                 .Returns(Task.CompletedTask);
             _repoAddressService.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
             _ownerRepository.Setup(a => a.Add(It.IsAny<Entity.Owner>()))
-                .Callback<Entity.Owner>(owner => owner.Id = Guid.NewGuid()) 
+                .Callback<Entity.Owner>(owner => owner.Id = Guid.NewGuid())
                 .Returns(Task.CompletedTask);
             _ownerRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
@@ -255,7 +255,7 @@ namespace Defra.PTS.Owner.Api.Services.Tests.Implementation
         }
 
         [Test]
-        public  void UpdateOwnerEmailsByOldEmail_WhenOwnersListIsNull_DoesNotThrow()
+        public void UpdateOwnerEmailsByOldEmail_WhenOwnersListIsNull_DoesNotThrow()
         {
             // Arrange
             var oldEmail = "old@example.com";

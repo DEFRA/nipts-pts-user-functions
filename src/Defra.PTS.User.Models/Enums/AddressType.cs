@@ -8,7 +8,7 @@ namespace Defra.PTS.User.Models.Enums
 {
     public enum AddressType
     {
-        User =  1,
+        User = 1,
         Owner = 2,
     }
 }

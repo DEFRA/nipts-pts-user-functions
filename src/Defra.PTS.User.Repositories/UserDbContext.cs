@@ -5,16 +5,16 @@ using Entity = Defra.PTS.User.Entities;
 
 namespace Defra.PTS.User.Repositories
 {
-    public class UserDbContext :DbContext
+    public class UserDbContext : DbContext
     {
         public UserDbContext(DbContextOptions<UserDbContext> options) : base(options)
         {
-                
+
         }
 
         public DbSet<Entity.User> User { get; set; }
         public DbSet<Entity.Owner> Owner { get; set; }
         public DbSet<Entity.Address> Address { get; set; }
-        
+
     }
 }

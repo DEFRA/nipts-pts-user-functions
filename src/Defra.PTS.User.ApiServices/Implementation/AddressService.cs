@@ -18,7 +18,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
 {
     [ExcludeFromCodeCoverage]
     public class AddressService : IAddressService
-    {        
+    {
         private readonly IRepository<Entity.Address> _addressRepository;
 
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
@@ -29,7 +29,7 @@ namespace Defra.PTS.User.ApiServices.Implementation
         public AddressService(
              IRepository<Entity.Address> addressRepository)
         {
-            _addressRepository = addressRepository;            
+            _addressRepository = addressRepository;
         }
 
 

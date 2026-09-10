@@ -31,7 +31,7 @@ namespace Defra.PTS.User.Functions.Functions
             // Perform health check logic here
             bool isHealthy = await _userService.PerformHealthCheckLogic();
 
-            var response = isHealthy 
+            var response = isHealthy
                 ? req.CreateResponse(HttpStatusCode.OK)
                 : req.CreateResponse(HttpStatusCode.ServiceUnavailable);
 

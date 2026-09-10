@@ -26,12 +26,12 @@ namespace Defra.PTS.User.Repositories.Implementation
 
         public async Task<bool> DoesUserExists(string userEmailAddress)
         {
-            return await UserContext?.User.AnyAsync(a => a.Email == userEmailAddress!)!;
+            return await UserContext?.User.AnyAsync(a => a.Email == userEmailAddress)!;
         }
 
         public async Task<Entity.User?> GetUser(string userEmailAddress)
         {
-                return await UserContext?.User?.SingleOrDefaultAsync(a => a.Email == userEmailAddress)!;
+            return await UserContext?.User?.SingleOrDefaultAsync(a => a.Email == userEmailAddress)!;
         }
 
         [ExcludeFromCodeCoverage]
@@ -39,15 +39,21 @@ namespace Defra.PTS.User.Repositories.Implementation
         {
             try
             {
+                var context = UserContext;
+                if (context is null)
+                {
+                    return false;
+                }
+
                 // Attempt to open a connection to the database
-                await UserContext!.Database.OpenConnectionAsync();
+                await context.Database.OpenConnectionAsync();
 
                 // Check if the connection is open
-                bool isOpen = UserContext.Database.GetDbConnection().State == ConnectionState.Open;
-                
+                bool isOpen = context.Database.GetDbConnection().State == ConnectionState.Open;
+
                 // Close the connection to prevent connection leaks
-                await UserContext.Database.CloseConnectionAsync();
-                
+                await context.Database.CloseConnectionAsync();
+
                 return isOpen;
             }
             catch

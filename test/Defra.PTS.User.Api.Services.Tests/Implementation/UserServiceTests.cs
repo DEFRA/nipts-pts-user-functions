@@ -41,7 +41,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
         public async Task CreateUser_WhenValidData_ReturnsGuid()
         {
             // Arrange
-            Guid addressGuid = Guid.NewGuid(); 
+            Guid addressGuid = Guid.NewGuid();
             var modelAddress = new Model.Address()
             {
                 AddressLineOne = "19 First Avenue",
@@ -74,7 +74,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
             };
 
             _userRepository.Setup(a => a.Add(It.IsAny<Entity.User>()))
-                .Callback<Entity.User>(user => user.Id = Guid.NewGuid()) 
+                .Callback<Entity.User>(user => user.Id = Guid.NewGuid())
                 .Returns(Task.CompletedTask);
             _userRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
 
@@ -365,7 +365,7 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
         }
 
         [Test]
-        public void  UpdateUserEmail_WhenUserNotFound_DoesNotThrow()
+        public void UpdateUserEmail_WhenUserNotFound_DoesNotThrow()
         {
             // Arrange
             var oldEmail = "old@example.com";
