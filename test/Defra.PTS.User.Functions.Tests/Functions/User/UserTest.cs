@@ -188,10 +188,12 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
         }
 
         [Test]
-        public async Task CreateUser_ContactIdNotFound_UserExists_ReturnsExistingUserId()
+        public async Task CreateUser_ContactIdNotFound_EmailHeldByAnotherRecord_DeactivatesAndCreatesNewUser()
         {
+            // UC4: new Government Gateway account (new ContactId) reusing the email of a previously
+            // dummied and deactivated account. The old record's email is freed, then a new user is created.
             var contactId = Guid.NewGuid();
-            var existingUserId = Guid.NewGuid();
+            var newUserId = Guid.NewGuid();
             var email = "existing@example.com";
 
             var userModel = new Model.User { ContactId = contactId, Email = email };
@@ -202,17 +204,52 @@ namespace Defra.PTS.User.Functions.Tests.Functions.User
 
             userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
             userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync((Entity.User?)null);
-            userServiceMock.Setup(a => a.DoesUserExists(email)).ReturnsAsync(true);
-            userServiceMock.Setup(a => a.UpdateUser(email, "signin")).ReturnsAsync(existingUserId);
-            userServiceMock.Setup(a => a.GetUserIdAsync(email)).ReturnsAsync(existingUserId);
+            userServiceMock.Setup(a => a.DeactivateConflictingUserEmail(email, contactId)).ReturnsAsync(true);
+            userServiceMock.Setup(a => a.CreateUser(userModel)).ReturnsAsync(newUserId);
 
             var result = await sut!.CreateUser(requestMock);
 
             Assert.That(result, Is.Not.Null);
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
 
-            userServiceMock.Verify(a => a.UpdateUser(email, "signin"), Times.Once);
-            userServiceMock.Verify(a => a.GetUserIdAsync(email), Times.Once);
+            userServiceMock.Verify(a => a.DeactivateConflictingUserEmail(email, contactId), Times.Once);
+            userServiceMock.Verify(a => a.CreateUser(userModel), Times.Once);
+            userServiceMock.Verify(a => a.GetUserIdAsync(It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
+        public async Task CreateUser_ContactIdFound_EmailHeldByAnotherRecord_DeactivatesConflictThenUpdatesEmail()
+        {
+            // UC6: active account (found by ContactId) changes its email back to one still held by a
+            // previously dummied and deactivated record. The conflicting record is deactivated, then the
+            // active record's email is updated.
+            var contactId = Guid.NewGuid();
+            var existingUserId = Guid.NewGuid();
+            var oldEmail = "old@example.com";
+            var newEmail = "reused@example.com";
+
+            var userModel = new Model.User { ContactId = contactId, Email = newEmail };
+            var existingUser = new Entity.User { Id = existingUserId, ContactId = contactId, Email = oldEmail };
+
+            var json = JsonConvert.SerializeObject(userModel);
+            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(json));
+            var requestMock = HttpRequestDataHelper.CreateMockHttpRequestData(memoryStream);
+
+            userServiceMock.Setup(a => a.GetUserModel(It.IsAny<Stream>())).ReturnsAsync(userModel);
+            userServiceMock.Setup(a => a.GetUserByContactId(contactId)).ReturnsAsync(existingUser);
+            userServiceMock.Setup(a => a.DeactivateConflictingUserEmail(newEmail, contactId)).ReturnsAsync(true);
+            userServiceMock.Setup(a => a.UpdateUserEmail(oldEmail, newEmail)).Returns(Task.CompletedTask);
+            ownerServiceMock.Setup(a => a.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail)).Returns(Task.CompletedTask);
+            userServiceMock.Setup(a => a.UpdateUser(newEmail, "signin")).ReturnsAsync(existingUserId);
+
+            var result = await sut!.CreateUser(requestMock);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+
+            userServiceMock.Verify(a => a.DeactivateConflictingUserEmail(newEmail, contactId), Times.Once);
+            userServiceMock.Verify(a => a.UpdateUserEmail(oldEmail, newEmail), Times.Once);
+            ownerServiceMock.Verify(a => a.UpdateOwnerEmailsByOldEmail(oldEmail, newEmail), Times.Once);
         }
 
         [Test]
