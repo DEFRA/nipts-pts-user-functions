@@ -399,6 +399,96 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
         }
 
         [Test]
+        public async Task DeactivateConflictingUserEmail_WhenDifferentContactId_AppendsInactiveSuffix()
+        {
+            // Arrange
+            var email = "reused@example.com";
+            var currentContactId = Guid.NewGuid();
+            var conflicting = new Entity.User
+            {
+                Id = Guid.NewGuid(),
+                ContactId = Guid.NewGuid(),
+                Email = email,
+                Uniquereference = "AB123456-C7-8901-D2-3456"
+            };
+
+            _userRepository.Setup(a => a.GetUser(email)).ReturnsAsync(conflicting);
+            _userRepository.Setup(a => a.Update(It.IsAny<Entity.User>()));
+            _userRepository.Setup(a => a.SaveChanges()).ReturnsAsync(1);
+
+            sut = new UserService(_userRepository.Object);
+
+            // Act
+            var result = await sut.DeactivateConflictingUserEmail(email, currentContactId);
+
+            // Assert
+            Assert.That(result, Is.True);
+            Assert.That(conflicting.Email, Is.EqualTo($"{email}.inactive.AB123456-C7-8901-D2-3456"));
+            _userRepository.Verify(a => a.Update(conflicting), Times.Once);
+            _userRepository.Verify(a => a.SaveChanges(), Times.Once);
+        }
+
+        [Test]
+        public async Task DeactivateConflictingUserEmail_WhenNoConflictingRecord_ReturnsFalse()
+        {
+            // Arrange
+            var email = "free@example.com";
+            _userRepository.Setup(a => a.GetUser(email)).ReturnsAsync((Entity.User?)null);
+
+            sut = new UserService(_userRepository.Object);
+
+            // Act
+            var result = await sut.DeactivateConflictingUserEmail(email, Guid.NewGuid());
+
+            // Assert
+            Assert.That(result, Is.False);
+            _userRepository.Verify(a => a.Update(It.IsAny<Entity.User>()), Times.Never);
+            _userRepository.Verify(a => a.SaveChanges(), Times.Never);
+        }
+
+        [Test]
+        public async Task DeactivateConflictingUserEmail_WhenSameContactId_DoesNotDeactivate()
+        {
+            // Arrange
+            var email = "own@example.com";
+            var contactId = Guid.NewGuid();
+            var ownRecord = new Entity.User
+            {
+                Id = Guid.NewGuid(),
+                ContactId = contactId,
+                Email = email,
+                Uniquereference = "REF-1"
+            };
+
+            _userRepository.Setup(a => a.GetUser(email)).ReturnsAsync(ownRecord);
+
+            sut = new UserService(_userRepository.Object);
+
+            // Act
+            var result = await sut.DeactivateConflictingUserEmail(email, contactId);
+
+            // Assert
+            Assert.That(result, Is.False);
+            Assert.That(ownRecord.Email, Is.EqualTo(email));
+            _userRepository.Verify(a => a.Update(It.IsAny<Entity.User>()), Times.Never);
+            _userRepository.Verify(a => a.SaveChanges(), Times.Never);
+        }
+
+        [Test]
+        public async Task DeactivateConflictingUserEmail_WhenEmptyEmail_ReturnsFalse()
+        {
+            // Arrange
+            sut = new UserService(_userRepository.Object);
+
+            // Act
+            var result = await sut.DeactivateConflictingUserEmail("", Guid.NewGuid());
+
+            // Assert
+            Assert.That(result, Is.False);
+            _userRepository.Verify(a => a.GetUser(It.IsAny<string>()), Times.Never);
+        }
+
+        [Test]
         public async Task GetOwnerEmailUpdateModel_WhenValidData_ReturnsModel()
         {
             // Arrange
