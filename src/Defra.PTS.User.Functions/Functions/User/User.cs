@@ -58,13 +58,27 @@ namespace Defra.PTS.User.Functions.Functions.User
 
             if (existingUser == null)
             {
-                return await HandleEmailBasedUser(userModel);
+                return await HandleContactIdNotFound(userModel);
             }
 
             await ProcessEmailUpdate(existingUser, userModel);
             await UpdateSignInTime(userModel.Email);
 
             return existingUser.Id;
+        }
+
+        private async Task<Guid> HandleContactIdNotFound(Model.User userModel)
+        {
+            if (string.IsNullOrEmpty(userModel.Email))
+            {
+                throw new UserFunctionException("User model must have either ContactId or Email");
+            }
+
+            // Email may belong to a previously dummied and deactivated account; free it before creating.
+            await userService.DeactivateConflictingUserEmail(userModel.Email, userModel.ContactId);
+
+            logger.LogInformation("Creating new user for ContactId {ContactId}", userModel.ContactId);
+            return await userService.CreateUser(userModel);
         }
 
         private async Task ProcessEmailUpdate(Entity.User existingUser, Model.User userModel)
@@ -81,6 +95,8 @@ namespace Defra.PTS.User.Functions.Functions.User
 
             try
             {
+                // Another (previously dummied/deactivated) record may already hold the new email; free it first.
+                await userService.DeactivateConflictingUserEmail(newEmail!, userModel.ContactId);
                 await userService.UpdateUserEmail(existingUserEmail!, newEmail!);
                 await ownerService.UpdateOwnerEmailsByOldEmail(existingUserEmail!, newEmail!);
                 logger.LogInformation("Successfully updated user and owner emails for ContactId {ContactId}", userModel.ContactId);

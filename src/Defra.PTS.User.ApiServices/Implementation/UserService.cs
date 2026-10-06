@@ -153,6 +153,26 @@ namespace Defra.PTS.User.ApiServices.Implementation
             }
         }
 
+        public async Task<bool> DeactivateConflictingUserEmail(string email, Guid? currentContactId)
+        {
+            if (string.IsNullOrEmpty(email))
+                return false;
+
+            var conflicting = await _userRepository.GetUser(email);
+            if (conflicting == null)
+                return false;
+
+            // Leave the caller's own active record untouched; only deactivate a different account's record.
+            if (currentContactId.HasValue && conflicting.ContactId == currentContactId.Value)
+                return false;
+
+            conflicting.Email = $"{email}.inactive.{conflicting.Uniquereference}";
+            conflicting.UpdatedOn = DateTime.UtcNow;
+            _userRepository.Update(conflicting);
+            await _userRepository.SaveChanges();
+            return true;
+        }
+
         public async Task<Model.OwnerEmailUpdateModel> GetOwnerEmailUpdateModel(Stream inputStream)
         {
             try
