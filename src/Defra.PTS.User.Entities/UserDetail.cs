@@ -17,5 +17,6 @@ namespace Defra.PTS.User.Entities
         public string? TownOrCity { get; set; }
         public string? County { get; set; }
         public string? PostCode { get; set; }
+        public bool IsUserSuspended { get; set; }
     }
 }
