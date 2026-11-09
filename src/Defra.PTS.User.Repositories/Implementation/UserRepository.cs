@@ -77,8 +77,21 @@ namespace Defra.PTS.User.Repositories.Implementation
                 AddressLineTwo = address?.AddressLineTwo,
                 TownOrCity = address?.TownOrCity,
                 County = address?.County,
-                PostCode = address?.PostCode
+                PostCode = address?.PostCode,
+                IsUserSuspended = user?.IsUserSuspended ?? false
             };
+        }
+
+        public async Task<bool> IsUserSuspended(Guid contactId)
+        {
+            if (UserContext?.User == null)
+                return false;
+
+            return await UserContext.User
+                .Where(u => u.ContactId == contactId)
+                .OrderByDescending(u => u.CreatedOn)
+                .Select(u => u.IsUserSuspended)
+                .FirstOrDefaultAsync();
         }
 
         public async Task<Entity.User?> GetUserByContactId(Guid contactId)

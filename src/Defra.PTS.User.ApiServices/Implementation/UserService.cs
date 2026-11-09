@@ -138,6 +138,11 @@ namespace Defra.PTS.User.ApiServices.Implementation
             return await _userRepository.DoesUserExistsByContactId(contactId);
         }
 
+        public async Task<bool> IsUserSuspended(Guid contactId)
+        {
+            return await _userRepository.IsUserSuspended(contactId);
+        }
+
         public async Task UpdateUserEmail(string oldEmail, string newEmail)
         {
             if (string.IsNullOrEmpty(oldEmail) || string.IsNullOrEmpty(newEmail))
