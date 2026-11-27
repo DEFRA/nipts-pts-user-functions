@@ -334,6 +334,42 @@ namespace Defra.PTS.User.Api.Services.Tests.Implementation
         }
 
         [Test]
+        public async Task IsUserSuspended_WhenUserSuspended_ReturnsTrue()
+        {
+            // Arrange
+            var contactId = Guid.NewGuid();
+            _userRepository.Setup(a => a.IsUserSuspended(contactId))
+                .ReturnsAsync(true);
+
+            sut = new UserService(_userRepository.Object);
+
+            // Act
+            var result = await sut.IsUserSuspended(contactId);
+
+            // Assert
+            Assert.That(result, Is.True);
+            _userRepository.Verify(a => a.IsUserSuspended(contactId), Times.Once);
+        }
+
+        [Test]
+        public async Task IsUserSuspended_WhenUserNotSuspended_ReturnsFalse()
+        {
+            // Arrange
+            var contactId = Guid.NewGuid();
+            _userRepository.Setup(a => a.IsUserSuspended(contactId))
+                .ReturnsAsync(false);
+
+            sut = new UserService(_userRepository.Object);
+
+            // Act
+            var result = await sut.IsUserSuspended(contactId);
+
+            // Assert
+            Assert.That(result, Is.False);
+            _userRepository.Verify(a => a.IsUserSuspended(contactId), Times.Once);
+        }
+
+        [Test]
         public async Task UpdateUserEmail_WhenValidData_UpdatesUserEmail()
         {
             // Arrange

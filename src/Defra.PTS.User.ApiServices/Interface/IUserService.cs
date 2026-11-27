@@ -20,6 +20,7 @@ namespace Defra.PTS.User.ApiServices.Interface
         Task<UserDetail> GetUserDetail(Guid contactId);
         Task<Entity.User?> GetUserByContactId(Guid contactId);
         Task<bool> DoesUserExistsByContactId(Guid contactId);
+        Task<bool> IsUserSuspended(Guid contactId);
         Task UpdateUserEmail(string oldEmail, string newEmail);
         Task<bool> DeactivateConflictingUserEmail(string email, Guid? currentContactId);
         Task<Model.OwnerEmailUpdateModel> GetOwnerEmailUpdateModel(Stream inputStream);

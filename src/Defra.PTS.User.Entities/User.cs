@@ -20,5 +20,6 @@ namespace Defra.PTS.User.Entities
         public DateTime? CreatedOn { get; set; }
         public Guid? UpdatedBy { get; set; }
         public DateTime? UpdatedOn { get; set; }
+        public bool IsUserSuspended { get; set; }
     }
 }

@@ -14,5 +14,6 @@ namespace Defra.PTS.User.Repositories.Interface
         Task<UserDetail> GetUserDetail(Guid contactId);
         Task<Entity.User?> GetUserByContactId(Guid contactId);
         Task<bool> DoesUserExistsByContactId(Guid contactId);
+        Task<bool> IsUserSuspended(Guid contactId);
     }
 }
